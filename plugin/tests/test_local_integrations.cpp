@@ -17,6 +17,7 @@ class LocalIntegrationsTest : public QObject {
 
 private Q_SLOTS:
   void metricsServerResponds();
+  void metricsServerBindingIsExplicit();
   void usageDatabaseExportsFiles();
   void webhookNotifierRejectsInsecureEndpoints();
   void webhookNotifierSanitizesGuardrailPayload();
@@ -64,6 +65,36 @@ void LocalIntegrationsTest::metricsServerResponds() {
   QVERIFY(request("POST /metrics HTTP/1.1\r\nHost: "
                   "localhost\r\nContent-Length: 0\r\n\r\n")
               .contains("405 Method Not Allowed"));
+}
+
+void LocalIntegrationsTest::metricsServerBindingIsExplicit() {
+  QTcpServer portProbe;
+  QVERIFY(portProbe.listen(QHostAddress::LocalHost, 0));
+  const quint16 port = portProbe.serverPort();
+  portProbe.close();
+
+  LocalMetricsServer server;
+  server.setPort(port);
+  server.setEnabled(true);
+  QVERIFY(server.isListening());
+  QVERIFY(!server.listenOnAllInterfaces());
+  QCOMPARE(server.listeningAddress(),
+           QHostAddress(QHostAddress::LocalHost).toString());
+
+  QSignalSpy bindingSpy(&server,
+                        &LocalMetricsServer::listenOnAllInterfacesChanged);
+  server.setListenOnAllInterfaces(true);
+  QCOMPARE(bindingSpy.count(), 1);
+  QVERIFY(server.isListening());
+  QVERIFY(server.listenOnAllInterfaces());
+  QCOMPARE(server.listeningAddress(),
+           QHostAddress(QHostAddress::AnyIPv4).toString());
+
+  server.setListenOnAllInterfaces(false);
+  QCOMPARE(bindingSpy.count(), 2);
+  QVERIFY(server.isListening());
+  QCOMPARE(server.listeningAddress(),
+           QHostAddress(QHostAddress::LocalHost).toString());
 }
 
 void LocalIntegrationsTest::usageDatabaseExportsFiles() {

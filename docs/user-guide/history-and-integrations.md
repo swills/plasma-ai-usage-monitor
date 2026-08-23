@@ -87,7 +87,8 @@ Secrets remain in KWallet and must be configured separately on a new computer.
 
 ## Prometheus
 
-Enable the metrics endpoint under History and choose an unused port. The server binds to 127.0.0.1 only.
+Enable the metrics endpoint under History and choose an unused port. The server
+binds to `127.0.0.1` by default.
 
 Example check for the default port:
 
@@ -95,7 +96,11 @@ Example check for the default port:
 curl http://127.0.0.1:9464/metrics
 ~~~
 
-Use a local Prometheus instance or an explicitly configured local forwarder. The widget does not expose the endpoint on other network interfaces.
+Use a local Prometheus instance or an explicitly configured local forwarder
+when possible. **Listen on all IPv4 interfaces** is an explicit opt-in for a
+Prometheus server on another host. It binds to `0.0.0.0`; the endpoint has no
+authentication or TLS, so restrict the selected port with a host or network
+firewall. Anyone who can connect can read the exported metrics.
 
 Guardrail metrics use fixed source/risk/value-class labels.
 `ai_usage_guardrail_risk_state` uses `0` unavailable, `1` safe, `2` warning,
