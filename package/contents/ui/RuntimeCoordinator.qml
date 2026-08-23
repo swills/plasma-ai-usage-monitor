@@ -1,5 +1,6 @@
 import QtQuick
 import com.github.loofi.aiusagemonitor 1.0 as MonitorPlugin
+import "PrometheusMetrics.js" as PrometheusMetrics
 
 Item {
     id: runtime
@@ -316,6 +317,10 @@ Item {
         }
 
         var tools = registry.allSubscriptionTools || [];
+        lines.push("# HELP ai_usage_tool_quota_percent_remaining Actual remaining quota reported by an authenticated tool source.");
+        lines.push("# TYPE ai_usage_tool_quota_percent_remaining gauge");
+        lines.push("# HELP ai_usage_tool_quota_reset_timestamp_seconds Unix timestamp when the actual quota window resets.");
+        lines.push("# TYPE ai_usage_tool_quota_reset_timestamp_seconds gauge");
         for (var j = 0; j < tools.length; j++) {
             var tool = tools[j];
             if (!tool.enabled || !tool.monitor) {
@@ -328,6 +333,8 @@ Item {
             lines.push("ai_usage_tool_percent_used{tool=\"" + toolKey + "\"} " + (tool.monitor.percentUsed || 0));
             lines.push("ai_usage_tool_last_activity_seconds{tool=\"" + toolKey + "\"} " + (tool.monitor.lastActivity ? Date.parse(tool.monitor.lastActivity) / 1000 : 0));
             lines.push("ai_usage_tool_subscription_fee{tool=\"" + toolKey + "\",cost_source=\"self_tracked\",currency=\"USD\"} " + (tool.monitor.hasSubscriptionCost ? (tool.monitor.subscriptionCost || 0) : 0));
+            PrometheusMetrics.appendToolQuotaMetrics(lines, toolKey,
+                                                     tool.monitor.quotaWindows || []);
             if (tool.monitor.hasSubscriptionCost) {
                 subscriptionFees += tool.monitor.subscriptionCost || 0;
             }
