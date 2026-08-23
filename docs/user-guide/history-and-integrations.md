@@ -103,11 +103,22 @@ authentication or TLS, so restrict the selected port with a host or network
 firewall. Anyone who can connect can read the exported metrics.
 
 Guardrail metrics use fixed source/risk/value-class labels.
+Authenticated local-tool quota windows are exported as
+`ai_usage_tool_quota_percent_remaining`, labeled by tool, window kind, source,
+and quality. `ai_usage_tool_quota_reset_timestamp_seconds` exports the reset as
+a Unix timestamp when the source provides one. The older
+`ai_usage_tool_percent_used` series remains the self-tracked plan estimate and
+must not be treated as live quota.
+
 `ai_usage_guardrail_risk_state` uses `0` unavailable, `1` safe, `2` warning,
 `3` critical and `4` exceeded.
 `ai_usage_guardrail_seconds_until_event` appears only when a predicted event
 exists. Their labels are limited to provider, risk kind, and actual/estimated
 value class.
+
+Import `docs/grafana-dashboard.json` into Grafana for a starter dashboard. Pick
+the Prometheus data source and, if necessary, select a subscription tool from
+the dashboard variable.
 
 ## Slack and Discord webhooks
 
