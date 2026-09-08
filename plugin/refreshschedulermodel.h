@@ -1,8 +1,9 @@
 #ifndef REFRESHSCHEDULERMODEL_H
 #define REFRESHSCHEDULERMODEL_H
 
-#include <QObject>
 #include <QDateTime>
+#include <QObject>
+#include <QTimer>
 #include <QtQmlIntegration/qqmlintegration.h>
 
 class RefreshSchedulerModel : public QObject
@@ -11,6 +12,10 @@ class RefreshSchedulerModel : public QObject
     QML_ELEMENT
 public:
     explicit RefreshSchedulerModel(QObject *parent = nullptr);
+
+    Q_INVOKABLE void startMonitoring();
+    void observeWakeClock(const QDateTime &now);
+    void observeReachability(bool online);
 
     Q_INVOKABLE int deterministicJitterMs(const QString &providerKey) const;
     Q_INVOKABLE int effectiveIntervalMs(int providerSeconds,
@@ -35,6 +40,15 @@ public:
                                                bool popupOpen,
                                                int consecutiveErrors,
                                                bool retryable) const;
+  Q_SIGNALS:
+    void recoveryRequested();
+
+  private:
+    QTimer m_wakeTimer;
+    QTimer m_recoveryTimer;
+    QDateTime m_lastWakeCheck;
+    bool m_seenOffline = false;
+    bool m_monitoring = false;
 };
 
 #endif

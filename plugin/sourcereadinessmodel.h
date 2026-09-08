@@ -83,6 +83,7 @@ public:
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
+    void setPresentationTime(const QDateTime &time);
     Q_INVOKABLE QVariantMap source(const QString &stableId) const;
     Q_INVOKABLE QStringList rankedSourceIds() const;
     Q_INVOKABLE void registerProviderBackend(const QString &stableId, QObject *backend);
@@ -136,6 +137,7 @@ private:
     static QString nextActionKey(NextAction action);
     static QString nextActionText(NextAction action);
 
+    QDateTime m_presentationTime;
     QList<SourceEntry> m_sources;
 };
 

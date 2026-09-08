@@ -23,6 +23,7 @@ TestCase {
 
     QtObject {
         id: fakeDailyState
+        property var presentationTime: new Date("2026-09-07T12:00:00Z")
         property var rows: ({})
         property var ids: []
         property var summary: ({})
@@ -153,6 +154,42 @@ TestCase {
             quotaWindows: [{ sourceClass: "actual", percentRemaining: data.value }]
         } }, summary({}));
         compare(dailyPresentation.lowestLiveQuota("tool"), null);
+    }
+
+    function test_subscriptionRangeRemainsRange() {
+        var card = createTemporaryObject(spendComponent, testCase);
+        verify(card !== null);
+        fakeDailyState.summary = { fixedSubscriptionFees: {},
+            fixedSubscriptionFeeRanges: [{ stableId: "tool", displayName: "Tool",
+                currency: "USD", rangeMin: 20, rangeMax: 40 }] };
+        compare(card.spendRows.length, 1);
+        verify(card.accessibleSummary().indexOf("20.00") >= 0);
+        verify(card.accessibleSummary().indexOf("40.00") >= 0);
+    }
+
+    function test_sharedClockUpdatesCountdownWithoutSourceChanges() {
+        fakeDailyState.presentationTime = new Date("2026-09-07T12:00:00Z");
+        load({}, summary({ nearestActualReset: {
+            stableId: "tool", resetAt: "2026-09-07T12:30:00Z"
+        } }));
+        compare(dailyPresentation.compactText("next-reset"), "30 min");
+        fakeDailyState.presentationTime = new Date("2026-09-07T12:10:00Z");
+        compare(dailyPresentation.compactText("next-reset"), "20 min");
+        compare(dailyPresentation.relativeReset("2026-09-07T12:30:00Z"), "20 min");
+    }
+
+    function test_tooltipUsesNormalizedZeroAndStaleReasons() {
+        load({ tool: {
+            stableId: "tool", displayName: "Tool", freshnessState: "fresh",
+            quotaWindows: [{ sourceClass: "actual", percentRemaining: 0,
+                window: "weekly", resetAt: "2026-09-08T12:00:00Z" }]
+        } }, summary({}));
+        verify(dailyPresentation.tooltipText().indexOf("0% remaining") >= 0);
+        verify(dailyPresentation.tooltipText().indexOf("weekly") >= 0);
+        fakeDailyState.rows.tool.freshnessState = "stale";
+        fakeDailyState.sourceChanged("tool");
+        verify(dailyPresentation.tooltipText().indexOf("Stale") >= 0);
+        verify(dailyPresentation.tooltipText().indexOf("0% remaining") < 0);
     }
 
     function test_legacyPanelModesMapToCanonicalModes() {

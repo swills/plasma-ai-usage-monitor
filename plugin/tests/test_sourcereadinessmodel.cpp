@@ -61,6 +61,11 @@ public:
     void setActivity(const QDateTime &time) { setLastActivity(time); }
     void setSyncInProgress(bool syncing) { setSyncing(syncing); }
     void setVerified(const QDateTime &time) { setLastSyncTime(time); }
+    void observeQuota() {
+      setSyncedQuotaWindows({QVariantMap{{"kind", "session"},
+                                         {"source", "browser_sync"},
+                                         {"percentRemaining", 25.0}}});
+    }
     void diagnostic(const QString &code) { Q_EMIT syncDiagnostic(toolName(), code, QStringLiteral("redacted")); }
     void complete(bool success) { Q_EMIT syncCompleted(success, QStringLiteral("redacted")); }
 
@@ -294,6 +299,8 @@ void SourceReadinessModelTest::localToolStateTransitions()
     tool.setActivity(QDateTime::currentDateTimeUtc());
     QCOMPARE(state(), QStringLiteral("reporting_estimate"));
     tool.setVerified(QDateTime::currentDateTimeUtc());
+    QCOMPARE(state(), QStringLiteral("reporting_estimate"));
+    tool.observeQuota();
     QCOMPARE(state(), QStringLiteral("reporting_actual"));
     tool.diagnostic(QStringLiteral("network_error"));
     QCOMPARE(state(), QStringLiteral("degraded"));

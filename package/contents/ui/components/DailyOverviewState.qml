@@ -5,6 +5,8 @@ QtObject {
 
     property var dailyState: null
     property int revision: 0
+    readonly property var presentationTime: dailyState && dailyState.presentationTime
+        ? dailyState.presentationTime : new Date()
 
     readonly property var summary: dailyState && dailyState.summary
         ? dailyState.summary : emptySummary()
@@ -31,6 +33,7 @@ QtObject {
 
     property CompactMetricState compactMetricState: CompactMetricState {
         summary: state.summary
+        presentationTime: state.presentationTime
     }
 
     function emptySummary() {
@@ -103,6 +106,49 @@ QtObject {
             return lowest;
         }
         return null;
+    }
+
+    function tooltipText() {
+        var lines = [];
+        for (var i = 0; i < sourceRows.length; ++i) {
+            var row = sourceRows[i];
+            var facts = [];
+            if (row.freshnessState === "stale") {
+                facts.push(i18n("Stale · refresh this source"));
+            } else if (row.freshnessState === "never") {
+                facts.push(i18n("Unavailable · verify this source"));
+            } else {
+                var windows = row.quotaWindows || [];
+                for (var j = 0; j < windows.length; ++j) {
+                    var window = windows[j];
+                    if (window.sourceClass !== "actual" || window.available === false
+                            || window.freshnessState === "stale"
+                            || typeof window.percentRemaining !== "number"
+                            || !Number.isFinite(window.percentRemaining)
+                            || window.percentRemaining < 0 || window.percentRemaining > 100)
+                        continue;
+                    var reset = window.resetAt ? new Date(window.resetAt) : null;
+                    if (reset && reset.getTime() <= new Date(presentationTime).getTime()) continue;
+                    var fact = i18n("Actual quota · %1 · %2% remaining",
+                        window.window || i18n("Current"), Math.round(window.percentRemaining));
+                    if (reset && Number.isFinite(reset.getTime()))
+                        fact += i18n(" · resets in %1", relativeReset(window.resetAt));
+                    facts.push(fact);
+                }
+                if (facts.length === 0) {
+                    if (row.qualityClass === "estimated")
+                        facts.push(i18n("Local activity · estimated"));
+                    else if (row.connectivityOnly || row.qualityClass === "connectivity_only")
+                        facts.push(i18n("Connectivity only"));
+                    else if (row.costAvailable && typeof row.costValue === "number")
+                        facts.push(i18n("Actual spend · %1 %2", row.currency, row.costValue));
+                    else
+                        facts.push(i18n("Quota unavailable"));
+                }
+            }
+            lines.push(i18n("%1: %2", row.displayName || row.stableId, facts.join(i18n(" · "))));
+        }
+        return lines.length ? lines.join("\n") : i18n("Click to configure sources");
     }
 
     function summaryText() {
@@ -204,6 +250,14 @@ QtObject {
                 label: i18n("Live reset · %1", reset.displayName)
             });
         }
+        var feeRanges = summary.fixedSubscriptionFeeRanges || [];
+        for (var r = 0; r < feeRanges.length; ++r) {
+            var fee = feeRanges[r];
+            facts.push({ icon: "wallet-open",
+                value: i18n("%1–%2 %3", Number(fee.rangeMin).toFixed(2),
+                    Number(fee.rangeMax).toFixed(2), fee.currency),
+                label: i18n("Published fee range · %1", fee.displayName) });
+        }
         var actual = formatTotals(summary.actualSpendTotals);
         var estimated = formatTotals(summary.estimatedSpendTotals);
         var fixed = formatTotals(summary.fixedSubscriptionFees);
@@ -277,16 +331,7 @@ QtObject {
     }
 
     function relativeReset(value, nowValue) {
-        var reset = new Date(value);
-        var now = nowValue ? new Date(nowValue) : new Date();
-        if (!Number.isFinite(reset.getTime()) || reset.getTime() <= now.getTime())
-            return i18n("now");
-        var minutes = Math.max(1, Math.ceil((reset.getTime() - now.getTime()) / 60000));
-        if (minutes < 60) return i18np("%1 min", "%1 min", minutes);
-        var hours = Math.ceil(minutes / 60);
-        if (hours < 48) return i18np("%1 hour", "%1 hours", hours);
-        var days = Math.ceil(hours / 24);
-        return i18np("%1 day", "%1 days", days);
+        return compactMetricState.relativeReset(value, nowValue);
     }
 
     function normalizeCompactMode(mode) {

@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [20.0.0] — 2026-09-07
+
+### Changed
+
+- Separate authenticated quota observation time from local file activity and
+  exclude stale or expired windows from live quota selection.
+- Select the earliest future reset independently of the lowest remaining quota.
+- Drive reset countdowns from one shared presentation clock.
+- Consolidate provider and tool tooltip facts through normalized daily state;
+  preserve available zero, unknown values and explicit stale labels.
+- Preserve subscription price ranges and validate evidence on individual entries.
+- Remove hardcoded fallback activity caps that were not account entitlements.
+- Reuse prepared Protobuf config discovery and compact panel sizing fixes.
+- Separate development media integrity checks from exact-source candidate
+  qualification, with isolated Plasma capture and retained failure diagnostics.
+
 ## [19.0.1] — 2026-08-17
 
 ### Fixed

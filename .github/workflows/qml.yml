@@ -3,6 +3,9 @@ on:
   pull_request:
   push:
     branches: [main]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
@@ -16,33 +19,4 @@ jobs:
       - run: cmake --preset ci && cmake --build --preset ci --target aiusagemonitorplugin
       - run: python3 scripts/qml_lint.py --build-dir build/ci
       - run: PYTHONNOUSERSITE=1 xvfb-run -a python3 scripts/smoke_test_qml_import.py --strict --build-dir build/ci
-      - name: Install isolated capture dependencies
-        run: |
-          dnf install -y kwin-wayland plasma-desktop spectacle ImageMagick jq ripgrep python3-gobject at-spi2-core breeze-gtk mesa-dri-drivers libcap procps-ng xorg-x11-server-Xwayland
-          # Virtual capture does not need the package's real-time scheduling capability.
-          # Removing it avoids execve(EPERM) under Docker's capability bounding set.
-          getcap /usr/bin/kwin_wayland
-          setcap -r /usr/bin/kwin_wayland
-      - name: Capture current Plasma release evidence
-        timeout-minutes: 10
-        env:
-          QT_QUICK_BACKEND: software
-          LIBGL_ALWAYS_SOFTWARE: '1'
-        shell: bash
-        run: bash scripts/demo/capture_v18_media.sh "$PWD/build/ci" 2>&1 | tee build/ci/plasma-capture.log
-      - name: Upload captured Plasma evidence
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: plasma-media-${{ github.event.pull_request.number || github.sha }}
-          path: assets/screenshots/
-          if-no-files-found: error
-      - name: Upload QML diagnostics
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: qml-diagnostics-${{ github.event.pull_request.number || github.sha }}
-          path: |
-            build/ci/qml-lint-report.json
-            build/ci/plasma-capture.log
-          if-no-files-found: ignore
       - run: dbus-run-session -- xvfb-run -a bash scripts/smoke_test_plasmoid.sh build/ci

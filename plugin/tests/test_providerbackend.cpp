@@ -83,6 +83,7 @@ private Q_SLOTS:
     void testClearError();
     void testIsRetryableStatus();
     void testTypedErrorRetryability();
+    void testAutomaticRecoveryRespectsErrors();
     void testNetworkErrorClassification();
     void testRefreshCoalescingAndManualSupersede();
     void testRetryAfterNumericAndHttpDate();
@@ -452,6 +453,29 @@ void ProviderBackendTest::testGenerationCounter()
     p.beginRefresh();
     QCOMPARE(p.currentGeneration(), 2);
     QVERIFY(!p.isCurrentGeneration(1));
+}
+
+void ProviderBackendTest::testAutomaticRecoveryRespectsErrors() {
+  TestProvider p;
+  for (const auto kind : {ProviderBackend::ProviderErrorKind::Authentication,
+                          ProviderBackend::ProviderErrorKind::Permission,
+                          ProviderBackend::ProviderErrorKind::Configuration,
+                          ProviderBackend::ProviderErrorKind::Schema}) {
+    p.setErrorDetails(QStringLiteral("redacted"), kind);
+    QVERIFY(!p.requestRefresh(ProviderBackend::RefreshReason::Retry));
+    QVERIFY(!p.requestRefresh(ProviderBackend::RefreshReason::Scheduled));
+  }
+  p.setErrorDetails(QStringLiteral("redacted"),
+                    ProviderBackend::ProviderErrorKind::RateLimit, 429,
+                    QDateTime::currentDateTimeUtc().addSecs(60));
+  QVERIFY(!p.requestRefresh(ProviderBackend::RefreshReason::Retry));
+  QCOMPARE(p.refreshCalls, 0);
+  p.setErrorDetails(QStringLiteral("redacted"),
+                    ProviderBackend::ProviderErrorKind::RateLimit, 429,
+                    QDateTime::currentDateTimeUtc().addSecs(-1));
+  QVERIFY(p.requestRefresh(ProviderBackend::RefreshReason::Retry));
+  QVERIFY(!p.requestRefresh(ProviderBackend::RefreshReason::Retry));
+  QCOMPARE(p.refreshCalls, 1);
 }
 
 void ProviderBackendTest::testTypedErrorRetryability()

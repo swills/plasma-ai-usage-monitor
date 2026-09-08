@@ -1,14 +1,15 @@
 #include "codexclimonitor.h"
-#include <QDir>
+#include <KLocalizedString>
 #include <QDebug>
+#include <QDir>
 #include <QFile>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QJsonArray>
 #include <QNetworkAccessManager>
-#include <QNetworkRequest>
 #include <QNetworkReply>
-#include <KLocalizedString>
+#include <QNetworkRequest>
+#include <cmath>
 
 #include "browsercookieextractor.h"
 
@@ -26,7 +27,8 @@ QVariantMap codexQuotaWindow(const QJsonObject &window)
     const double usedPercent = numericField(window, QStringLiteral("used_percent"), QStringLiteral("usedPercent"));
     const double windowSeconds = numericField(window, QStringLiteral("limit_window_seconds"), QStringLiteral("windowSeconds"));
     const double resetAt = numericField(window, QStringLiteral("reset_at"), QStringLiteral("resetsAt"));
-    if (usedPercent < 0.0) return {};
+    if (!std::isfinite(usedPercent) || usedPercent < 0.0 || usedPercent > 100.0)
+      return {};
 
     const bool weekly = windowSeconds >= 6.0 * 24.0 * 60.0 * 60.0;
     QVariantMap row;
@@ -144,12 +146,20 @@ bool CodexCliMonitor::fetchCodexUsage(const QString &cookieHeader)
     connect(reply, &QNetworkReply::finished, this, [this, reply, cookieHeader]() {
         reply->deleteLater();
         if (reply->error() != QNetworkReply::NoError) {
-            const int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-            if ((status == 401 || status == 403) && !cookieHeader.isEmpty()) {
-                qWarning() << "CodexCliMonitor: Codex usage request rejected; falling back to browser account check, HTTP" << status;
-                fetchAccountCheck(cookieHeader);
-                return;
-            }
+          recordSyncHttpFailure(
+              reply->attribute(QNetworkRequest::HttpStatusCodeAttribute)
+                  .toInt(),
+              reply->rawHeader("Retry-After"));
+          const int status =
+              reply->attribute(QNetworkRequest::HttpStatusCodeAttribute)
+                  .toInt();
+          if ((status == 401 || status == 403) && !cookieHeader.isEmpty()) {
+            qWarning() << "CodexCliMonitor: Codex usage request rejected; "
+                          "falling back to browser account check, HTTP"
+                       << status;
+            fetchAccountCheck(cookieHeader);
+            return;
+          }
             setSyncing(false);
             setSyncStatus(i18n("Sync failed"));
             Q_EMIT syncCompleted(false, reply->errorString());
@@ -229,20 +239,30 @@ void CodexCliMonitor::fetchAccountCheck(const QString &cookieHeader)
         reply->deleteLater();
 
         if (reply->error() != QNetworkReply::NoError) {
-            int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-            qWarning() << "CodexCliMonitor: Account check failed:" << reply->errorString() << "HTTP" << httpStatus;
-            setSyncing(false);
-            if (httpStatus == 401 || httpStatus == 403) {
-                setSyncStatus(i18n("Session expired"));
-                const QString message = i18n("Session expired — please log in to chatgpt.com in Firefox again");
-                Q_EMIT syncDiagnostic(toolName(), QStringLiteral("session_expired"), message);
-                Q_EMIT syncCompleted(false, message);
-            } else {
-                setSyncStatus(i18n("Sync failed"));
-                const QString message = reply->errorString();
-                Q_EMIT syncDiagnostic(toolName(), QStringLiteral("network_error"), message);
-                Q_EMIT syncCompleted(false, message);
-            }
+          recordSyncHttpFailure(
+              reply->attribute(QNetworkRequest::HttpStatusCodeAttribute)
+                  .toInt(),
+              reply->rawHeader("Retry-After"));
+          int httpStatus =
+              reply->attribute(QNetworkRequest::HttpStatusCodeAttribute)
+                  .toInt();
+          qWarning() << "CodexCliMonitor: Account check failed:"
+                     << reply->errorString() << "HTTP" << httpStatus;
+          setSyncing(false);
+          if (httpStatus == 401 || httpStatus == 403) {
+            setSyncStatus(i18n("Session expired"));
+            const QString message = i18n("Session expired — please log in to "
+                                         "chatgpt.com in Firefox again");
+            Q_EMIT syncDiagnostic(toolName(), QStringLiteral("session_expired"),
+                                  message);
+            Q_EMIT syncCompleted(false, message);
+          } else {
+            setSyncStatus(i18n("Sync failed"));
+            const QString message = reply->errorString();
+            Q_EMIT syncDiagnostic(toolName(), QStringLiteral("network_error"),
+                                  message);
+            Q_EMIT syncCompleted(false, message);
+          }
             return;
         }
 

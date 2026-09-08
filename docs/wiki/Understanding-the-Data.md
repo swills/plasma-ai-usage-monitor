@@ -136,3 +136,22 @@ requirement is missing, the result is unavailable rather than guessed.
 
 See [Runway guardrails](Runway-Guardrails) for the exact thresholds,
 scope/privacy boundary, notification defaults, and Prometheus semantics.
+
+## Quota observation and countdowns
+
+Live quota requires a valid authenticated observation. Local file activity and a
+successful response without quota do not refresh an older quota observation.
+Quota observations older than 15 minutes, or windows whose reset has passed,
+are withheld from the panel's live selection until new data arrives. Source
+Detail retains explicit last-known values and observation times.
+
+The lowest remaining quota and next reset are independent. For example, a weekly
+window with 10% remaining can be the lowest quota while a five-hour window with
+80% remaining resets first. Reset countdowns share one presentation clock;
+updating the displayed time does not itself call a provider.
+
+Automatic recovery requests coalesce after a missed wake interval or network
+recovery. Authentication and permission failures require corrective action.
+Rate-limited browser and API requests honor Retry-After; transient failures wait
+before retrying. Use source settings to repair credentials and explicitly verify
+the source after repair.

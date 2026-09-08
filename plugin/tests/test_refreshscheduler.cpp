@@ -6,11 +6,29 @@ class RefreshSchedulerModelTest : public QObject
 {
     Q_OBJECT
 private Q_SLOTS:
-    void deterministicJitter();
-    void idleAndPopupIntervals();
-    void retryBackoff();
-    void freshnessAndNextSchedule();
+  void recoveryEventsCoalesce();
+  void deterministicJitter();
+  void idleAndPopupIntervals();
+  void retryBackoff();
+  void freshnessAndNextSchedule();
 };
+
+void RefreshSchedulerModelTest::recoveryEventsCoalesce() {
+  RefreshSchedulerModel model;
+  QSignalSpy recovered(&model, &RefreshSchedulerModel::recoveryRequested);
+  const auto start = QDateTime(QDate(2026, 9, 7), QTime(12, 0), QTimeZone::UTC);
+  model.observeWakeClock(start);
+  model.observeWakeClock(start.addSecs(30));
+  QCOMPARE(recovered.count(), 0);
+  model.observeReachability(false);
+  model.observeWakeClock(start.addSecs(3600));
+  model.observeReachability(true);
+  model.observeReachability(true);
+  QTRY_COMPARE(recovered.count(), 1);
+  model.observeWakeClock(start.addSecs(3630));
+  model.observeReachability(true);
+  QCOMPARE(recovered.count(), 1);
+}
 
 void RefreshSchedulerModelTest::deterministicJitter()
 {

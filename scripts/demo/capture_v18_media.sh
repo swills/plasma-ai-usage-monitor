@@ -5,10 +5,15 @@ if [[ "${AI_USAGE_V18_CAPTURE_INNER:-0}" != "1" ]]; then
   CAPTURE_SCRIPT="$(realpath "$0")"
   CAPTURE_ROOT="$(cd "$(dirname "$CAPTURE_SCRIPT")/../.." && pwd)"
   CAPTURE_BUILD_DIR="${1:-}"
-  CAPTURE_OUTPUT_DIR="${2:-}"
+  CAPTURE_OUTPUT_DIR="${2:-${CAPTURE_ROOT}/assets/screenshots}"
+  mkdir -p "$CAPTURE_OUTPUT_DIR"
+  CAPTURE_OUTPUT_DIR="$(realpath "$CAPTURE_OUTPUT_DIR")"
+  CAPTURE_LOG_DIR="${AI_USAGE_CAPTURE_LOG_DIR:-${CAPTURE_ROOT}/build/capture-diagnostics}"
+  mkdir -p "$CAPTURE_LOG_DIR"
+  CAPTURE_LOG_DIR="$(realpath "$CAPTURE_LOG_DIR")"
   VIRTUAL_ROOT="$(mktemp -d)"
   VIRTUAL_RUNTIME="${VIRTUAL_ROOT}/runtime"
-  mkdir -p "$VIRTUAL_RUNTIME"
+  mkdir -p "$VIRTUAL_RUNTIME" "$VIRTUAL_ROOT/home" "$VIRTUAL_ROOT/config" "$VIRTUAL_ROOT/cache" "$VIRTUAL_ROOT/data"
   chmod 700 "$VIRTUAL_RUNTIME"
   CAPTURE_SCRIPT_LINK="${VIRTUAL_ROOT}/capture-v18"
   ln -s "$CAPTURE_SCRIPT" "$CAPTURE_SCRIPT_LINK"
@@ -20,6 +25,14 @@ if [[ "${AI_USAGE_V18_CAPTURE_INNER:-0}" != "1" ]]; then
   }
   trap 'cleanup_virtual' EXIT
   dbus-run-session -- env \
+    HOME="$VIRTUAL_ROOT/home" \
+    XDG_CONFIG_HOME="$VIRTUAL_ROOT/config" \
+    XDG_CACHE_HOME="$VIRTUAL_ROOT/cache" \
+    XDG_DATA_HOME="$VIRTUAL_ROOT/data" \
+    GIT_CONFIG_COUNT=1 \
+    GIT_CONFIG_KEY_0=safe.directory \
+    GIT_CONFIG_VALUE_0="$CAPTURE_ROOT" \
+    AI_USAGE_CAPTURE_LOG_DIR="$CAPTURE_LOG_DIR" \
     AI_USAGE_V18_CAPTURE_INNER=1 \
     AI_USAGE_V18_BUILD_DIR="$CAPTURE_BUILD_DIR" \
     AI_USAGE_V18_OUTPUT_DIR="$CAPTURE_OUTPUT_DIR" \
@@ -29,7 +42,8 @@ if [[ "${AI_USAGE_V18_CAPTURE_INNER:-0}" != "1" ]]; then
     GTK_IM_MODULE= \
     kwin_wayland --virtual --socket wayland-v18-capture \
       --width 1920 --height 1200 --scale 1 --no-lockscreen \
-      --no-global-shortcuts --exit-with-session "$CAPTURE_SCRIPT_LINK"
+      --no-global-shortcuts --exit-with-session "$CAPTURE_SCRIPT_LINK" \
+      2>&1 | tee "$CAPTURE_LOG_DIR/compositor.log"
   exit $?
 fi
 
@@ -84,6 +98,10 @@ cleanup() {
     busctl --user call org.kde.KWin /Scripting org.kde.kwin.Scripting \
       unloadScript s "$KWIN_SCRIPT_NAME" >/dev/null 2>&1 || true
   fi
+  if [[ -n "${AI_USAGE_CAPTURE_LOG_DIR:-}" ]]; then
+    cp "$SESSION_ROOT"/*.log "$AI_USAGE_CAPTURE_LOG_DIR/" 2>/dev/null || true
+    cp "$EVIDENCE_JSONL" "$AI_USAGE_CAPTURE_LOG_DIR/" 2>/dev/null || true
+  fi
   if [[ -d "$SESSION_ROOT" && "$SESSION_ROOT" == /tmp/* ]]; then
     find "$SESSION_ROOT" -depth -delete
   fi
@@ -91,7 +109,7 @@ cleanup() {
 trap cleanup EXIT
 
 for command in cmake plasmawindowed plasmashell kwin_wayland spectacle busctl \
-  identify magick jq sha256sum kwriteconfig6 dbus-run-session setsid pgrep; do
+  identify magick jq sha256sum kwriteconfig6 dbus-run-session setsid pgrep rg python3; do
   command -v "$command" >/dev/null || {
     echo "Missing capture dependency: $command" >&2
     exit 1
@@ -104,7 +122,10 @@ done
 }
 
 mkdir -p "$OUTPUT_DIR" "$CONFIG_HOME" "$CACHE_HOME"
-cmake --install "$BUILD_DIR" --prefix "$PREFIX" >/dev/null
+SOURCE_BEFORE="$(python3 "$ROOT_DIR/scripts/demo/source_identity.py")"
+cmake -S "$ROOT_DIR" -B "$BUILD_DIR" >"${SESSION_ROOT}/configure.log" 2>&1
+cmake --build "$BUILD_DIR" --target aiusagemonitorplugin >"${SESSION_ROOT}/build.log" 2>&1
+cmake --install "$BUILD_DIR" --prefix "$PREFIX" >"${SESSION_ROOT}/install.log" 2>&1
 QML_PATH="$(find "$PREFIX" -type d -path '*/qt6/qml' -print -quit)"
 [[ -n "$QML_PATH" ]] || {
   echo "Installed QML module was not found under $PREFIX" >&2
@@ -547,16 +568,11 @@ FIXTURE_SHA="$(
     package/contents/ui/components/MediaDailyState.qml \
     | sha256sum | cut -d' ' -f1
 )"
-SOURCE_TREE_SHA="$(
-  cd "$ROOT_DIR"
-  git ls-files --cached --others --exclude-standard -- \
-    CMakeLists.txt package plugin scripts/demo \
-    | sort \
-    | while IFS= read -r path; do
-        [[ -f "$path" ]] && sha256sum "$path"
-      done \
-    | sha256sum | cut -d' ' -f1
-)"
+SOURCE_TREE_SHA="$(python3 "$ROOT_DIR/scripts/demo/source_identity.py")"
+[[ "$SOURCE_TREE_SHA" == "$SOURCE_BEFORE" ]] || {
+  echo "Source changed during capture; discard these images and recapture" >&2
+  exit 1
+}
 RELEASE_VERSION="$(
   if [[ -f "$ROOT_DIR/RELEASE_TARGET" ]]; then
     cat "$ROOT_DIR/RELEASE_TARGET"
@@ -567,7 +583,7 @@ RELEASE_VERSION="$(
 CAPTURE_COMMIT="${CAPTURE_COMMIT:-$(git -C "$ROOT_DIR" rev-parse HEAD)}"
 SOURCE_TREE_COMMIT="${SOURCE_TREE_COMMIT:-$CAPTURE_COMMIT}"
 SOURCE_TREE_MODE="git-commit"
-if [[ -n "$(git -C "$ROOT_DIR" status --short -- package plugin scripts/demo)" ]]; then
+if [[ -n "$(git -C "$ROOT_DIR" status --short -- CMakeLists.txt package plugin scripts/demo)" ]]; then
   SOURCE_TREE_MODE="filesystem-release-candidate"
 fi
 CAPTURED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -626,5 +642,5 @@ jq -n \
     assets: $assets}' \
   >"${OUTPUT_DIR}/v18-media-manifest.json"
 
-python3 "$ROOT_DIR/scripts/check_release_media.py"
+python3 "$ROOT_DIR/scripts/check_release_media.py" --screenshots "$OUTPUT_DIR"
 echo "v18 media capture complete: $OUTPUT_DIR"

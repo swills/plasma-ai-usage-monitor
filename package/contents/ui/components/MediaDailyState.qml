@@ -8,7 +8,8 @@ QtObject {
     readonly property bool active: AppInfo.demoMode
         && scenario.indexOf("media-") === 0
         && ["media-overview", "media-attention", "media-quota",
-            "media-tool-only", "media-panel",
+            "media-tool-only", "media-panel", "media-panel-disconnected",
+            "media-panel-zero", "media-panel-full",
             "media-source-detail"].indexOf(scenario) >= 0
     readonly property var rows: buildRows()
     readonly property var summary: buildSummary()
@@ -61,6 +62,12 @@ QtObject {
     }
 
     function buildRows() {
+        if (scenario === "media-panel-disconnected")
+            return [];
+        if (scenario === "media-panel-zero")
+            return [quotaRow(0, 2, "critical")];
+        if (scenario === "media-panel-full")
+            return [quotaRow(100, 3, "none")];
         if (scenario === "media-attention")
             return [quotaRow(4, 2, "critical")];
         if (scenario === "media-quota" || scenario === "media-panel")

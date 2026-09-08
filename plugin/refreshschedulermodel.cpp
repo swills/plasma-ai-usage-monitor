@@ -1,11 +1,60 @@
 #include "refreshschedulermodel.h"
 
+#include <QNetworkInformation>
 #include <QtGlobal>
 #include <cmath>
 
 RefreshSchedulerModel::RefreshSchedulerModel(QObject *parent)
     : QObject(parent)
 {
+  m_recoveryTimer.setSingleShot(true);
+  m_recoveryTimer.setInterval(1000);
+  connect(&m_recoveryTimer, &QTimer::timeout, this,
+          &RefreshSchedulerModel::recoveryRequested);
+  m_wakeTimer.setInterval(30000);
+  connect(&m_wakeTimer, &QTimer::timeout, this,
+          [this]() { observeWakeClock(QDateTime::currentDateTimeUtc()); });
+}
+
+void RefreshSchedulerModel::startMonitoring() {
+  if (m_monitoring)
+    return;
+  m_monitoring = true;
+  observeWakeClock(QDateTime::currentDateTimeUtc());
+  m_wakeTimer.start();
+  QNetworkInformation::loadDefaultBackend();
+  if (auto *network = QNetworkInformation::instance()) {
+    m_seenOffline = network->reachability() ==
+                    QNetworkInformation::Reachability::Disconnected;
+    connect(network, &QNetworkInformation::reachabilityChanged, this,
+            [this](QNetworkInformation::Reachability reachability) {
+              if (reachability == QNetworkInformation::Reachability::Unknown)
+                return;
+              observeReachability(reachability ==
+                                  QNetworkInformation::Reachability::Online);
+            });
+  }
+}
+
+void RefreshSchedulerModel::observeWakeClock(const QDateTime &now) {
+  if (!now.isValid())
+    return;
+  // A missed timer interval covers suspend/resume without touching login
+  // services.
+  if (m_lastWakeCheck.isValid() && m_lastWakeCheck.secsTo(now) > 90 &&
+      !m_recoveryTimer.isActive())
+    m_recoveryTimer.start();
+  m_lastWakeCheck = now;
+}
+
+void RefreshSchedulerModel::observeReachability(bool online) {
+  if (!online) {
+    m_seenOffline = true;
+    return;
+  }
+  if (m_seenOffline && !m_recoveryTimer.isActive())
+    m_recoveryTimer.start();
+  m_seenOffline = false;
 }
 
 int RefreshSchedulerModel::deterministicJitterMs(const QString &providerKey) const
@@ -55,8 +104,9 @@ bool RefreshSchedulerModel::isFresh(const QDateTime &lastSuccess,
                                     const QDateTime &now) const
 {
     if (!lastSuccess.isValid() || !now.isValid()) return false;
-    return lastSuccess.toUTC().msecsTo(now.toUTC())
-        < effectiveIntervalMs(providerSeconds, globalSeconds, popupOpen);
+    return lastSuccess <= now &&
+           lastSuccess.toUTC().msecsTo(now.toUTC()) <
+               effectiveIntervalMs(providerSeconds, globalSeconds, popupOpen);
 }
 
 QDateTime RefreshSchedulerModel::nextScheduledRefresh(const QDateTime &lastSuccess,

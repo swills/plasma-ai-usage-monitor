@@ -33,3 +33,6 @@ __pycache__/
 tmpclaude-*
 .tmp-*.log
 *.plasmoid
+
+# Local qualification intermediates
+/work/

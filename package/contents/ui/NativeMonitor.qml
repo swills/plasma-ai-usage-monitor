@@ -29,48 +29,7 @@ Item {
     property bool popupExpanded: false
     // qmllint enable unresolved-type
 
-    readonly property string toolTipSubText: {
-        var lines = [];
-        var providers = root.allProviders || [];
-        for (var i = 0; i < providers.length; i++) {
-            var provider = providers[i];
-            if (provider.enabled && provider.backend && provider.backend.connected) {
-                var info = provider.name + ": ";
-                if (provider.backend.cost > 0) {
-                    info += Utils.formatMoney(provider.backend.cost, provider.backend.currency || "USD") + " | ";
-                }
-                if ((provider.backend.rateLimitRequestsRemaining || 0) > 0) {
-                    info += provider.backend.rateLimitRequestsRemaining + " req left";
-                } else if ((provider.backend.rateLimitTokensRemaining || 0) > 0) {
-                    info += provider.backend.rateLimitTokensRemaining + " tokens left";
-                } else {
-                    info += i18n("Healthy");
-                }
-                lines.push(info);
-            } else if (provider.enabled && provider.backend && provider.backend.error) {
-                lines.push(provider.name + ": " + i18n("Error"));
-            }
-        }
-        var tools = root.allSubscriptionTools || [];
-        for (var j = 0; j < tools.length; j++) {
-            var tool = tools[j];
-            if (tool.enabled && tool.monitor && tool.monitor.installed) {
-                var toolInfo = tool.name + ": ";
-                var liveRemaining = tooltipState.lowestLiveQuota(tool.stableId);
-                if (liveRemaining !== null) {
-                    toolInfo += i18n("%1% remaining", Math.round(liveRemaining));
-                } else if (tool.monitor.limitReached) {
-                    toolInfo += i18n("Limit Reached");
-                } else if ((tool.monitor.usageLimit || 0) > 0) {
-                    toolInfo += tool.monitor.usageCount + "/" + tool.monitor.usageLimit + " " + i18n("used");
-                } else {
-                    toolInfo += i18n("Active");
-                }
-                lines.push(toolInfo);
-            }
-        }
-        return lines.length > 0 ? lines.join("\n") : i18n("Click to configure providers");
-    }
+    readonly property string toolTipSubText: tooltipState.tooltipText()
 
     property alias openai: openaiBackend
     property alias anthropic: anthropicBackend

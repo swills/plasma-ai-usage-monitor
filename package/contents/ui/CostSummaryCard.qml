@@ -54,7 +54,7 @@ Rectangle {
                     elide: Text.ElideRight
                 }
                 PlasmaComponents.Label {
-                    text: Utils.formatCurrencyTotals(spendRow.modelData.totals)
+                    text: card.rowValue(spendRow.modelData)
                     font.bold: true
                 }
             }
@@ -84,13 +84,25 @@ Rectangle {
             rows.push({ label: i18n("Estimated spend"), icon: "view-statistics", totals: estimated });
         if (hasTotals(fees))
             rows.push({ label: i18n("Fixed subscription fees"), icon: "office-chart-ring", totals: fees });
+        var ranges = summary.fixedSubscriptionFeeRanges || [];
+        for (var i = 0; i < ranges.length; ++i) {
+            var range = ranges[i];
+            rows.push({ label: i18n("Published fee range · %1", range.displayName),
+                icon: "office-chart-ring", range: range });
+        }
         return rows;
+    }
+
+    function rowValue(row) {
+        if (!row.range) return Utils.formatCurrencyTotals(row.totals);
+        return i18n("%1–%2 %3", Number(row.range.rangeMin).toFixed(2),
+            Number(row.range.rangeMax).toFixed(2), row.range.currency);
     }
 
     function accessibleSummary() {
         var parts = [];
         for (var i = 0; i < spendRows.length; i++)
-            parts.push(spendRows[i].label + ": " + Utils.formatCurrencyTotals(spendRows[i].totals));
+            parts.push(spendRows[i].label + ": " + rowValue(spendRows[i]));
         return parts.join(i18n(" · "));
     }
 }

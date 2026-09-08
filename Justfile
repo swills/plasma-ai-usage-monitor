@@ -52,7 +52,7 @@ check:
     python3 scripts/generate_wiki_docs.py --check
     python3 scripts/check_demo_contract.py
     python3 scripts/check_release_policy.py
-    python3 scripts/check_release_media.py
+    python3 scripts/check_release_media.py --mode development
     python3 scripts/test_release_media_evidence.py
     bash scripts/test_verify_exact_tag.sh
 

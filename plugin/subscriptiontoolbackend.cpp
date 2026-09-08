@@ -2,11 +2,19 @@
 #include "subscriptionplancatalog.h"
 #include <QDate>
 #include <QDebug>
-#include <QTimeZone>
 #include <QNetworkAccessManager>
+#include <QTimeZone>
 #include <QVariantMap>
+#include <cmath>
 
 namespace {
+bool authenticatedQuotaSource(const QVariantMap &row) {
+  const QString source = row.value(QStringLiteral("source")).toString();
+  return source == QLatin1String("browser_sync") ||
+         source == QLatin1String("antigravity_local") ||
+         source == QLatin1String("local_daemon_actual");
+}
+
 QString sourceBadge(const QVariantMap &row)
 {
     const QString precision = row.value(QStringLiteral("precision")).toString();
@@ -67,39 +75,6 @@ bool isNumericQuotaUnit(const QString &unit)
         || unit == QLatin1String("reviews");
 }
 
-int localActivityFallbackLimit(const QString &toolKey, const QString &planId)
-{
-    if (toolKey == QLatin1String("claude-code")) {
-        if (planId == QLatin1String("max_20x")) return 2000;
-        if (planId == QLatin1String("max_5x")) return 500;
-        return 100;
-    }
-    if (toolKey == QLatin1String("codex-cli")) {
-        if (planId == QLatin1String("pro")) return 1000;
-        if (planId == QLatin1String("pro_100")) return 500;
-        if (planId == QLatin1String("plus")) return 100;
-        if (planId == QLatin1String("free") || planId == QLatin1String("go")) return 25;
-        return 500;
-    }
-    if (toolKey == QLatin1String("cursor")) {
-        if (planId == QLatin1String("ultra")) return 10000;
-        if (planId == QLatin1String("pro_plus")) return 1500;
-        if (planId == QLatin1String("hobby")) return 50;
-        return 500;
-    }
-    if (toolKey == QLatin1String("windsurf")) {
-        if (planId == QLatin1String("max")) return 5000;
-        if (planId == QLatin1String("free")) return 25;
-        return 500;
-    }
-    if (toolKey == QLatin1String("jetbrains-ai")) {
-        if (planId == QLatin1String("ai_ultimate") || planId == QLatin1String("ai_enterprise")) return 70;
-        if (planId == QLatin1String("ai_pro")) return 20;
-        return 3;
-    }
-    return 0;
-}
-
 QVariantMap usageRow(const QString &kind,
                      const QString &label,
                      const QString &unit,
@@ -138,13 +113,33 @@ SubscriptionToolBackend::SubscriptionToolBackend(QObject *parent)
     : QObject(parent)
     , m_resetCheckTimer(new QTimer(this))
 {
-    // Check for period resets every 60 seconds
-    m_resetCheckTimer->setInterval(60 * 1000);
-    connect(m_resetCheckTimer, &QTimer::timeout, this, &SubscriptionToolBackend::checkAndResetPeriod);
-    connect(this, &SubscriptionToolBackend::usageUpdated, this, &SubscriptionToolBackend::quotaWindowsChanged);
-    connect(this, &SubscriptionToolBackend::usageLimitChanged, this, &SubscriptionToolBackend::quotaWindowsChanged);
-    connect(this, &SubscriptionToolBackend::planTierChanged, this, &SubscriptionToolBackend::quotaWindowsChanged);
-    connect(this, &SubscriptionToolBackend::syncStatusChanged, this, &SubscriptionToolBackend::quotaWindowsChanged);
+  connect(this, &SubscriptionToolBackend::syncCompleted, this,
+          [this](bool success, const QString &) {
+            if (success)
+              resetSyncRetry();
+            else if (!m_syncNeedsAction && !m_syncRetryAfter.isValid())
+              recordSyncHttpFailure(0, {});
+          });
+  connect(this, &SubscriptionToolBackend::syncDiagnostic, this,
+          [this](const QString &, const QString &code, const QString &) {
+            if (code == QLatin1String("session_expired") ||
+                code == QLatin1String("not_logged_in") ||
+                code == QLatin1String("format_changed") ||
+                code == QLatin1String("invalid_response"))
+              m_syncNeedsAction = true;
+          });
+  // Check for period resets every 60 seconds
+  m_resetCheckTimer->setInterval(60 * 1000);
+  connect(m_resetCheckTimer, &QTimer::timeout, this,
+          &SubscriptionToolBackend::checkAndResetPeriod);
+  connect(this, &SubscriptionToolBackend::usageUpdated, this,
+          &SubscriptionToolBackend::quotaWindowsChanged);
+  connect(this, &SubscriptionToolBackend::usageLimitChanged, this,
+          &SubscriptionToolBackend::quotaWindowsChanged);
+  connect(this, &SubscriptionToolBackend::planTierChanged, this,
+          &SubscriptionToolBackend::quotaWindowsChanged);
+  connect(this, &SubscriptionToolBackend::syncStatusChanged, this,
+          &SubscriptionToolBackend::quotaWindowsChanged);
 }
 
 SubscriptionToolBackend::~SubscriptionToolBackend() = default;
@@ -490,11 +485,11 @@ double SubscriptionToolBackend::sessionPercentUsed() const { return m_sessionPer
 bool SubscriptionToolBackend::hasSessionInfo() const { return m_hasSessionInfo; }
 void SubscriptionToolBackend::setSessionPercentUsed(double pct)
 {
-    const double normalized = qBound(0.0, pct, 100.0);
-    if (!qFuzzyCompare(m_sessionPercentUsed + 1.0, normalized + 1.0)) {
-        m_sessionPercentUsed = normalized;
-        Q_EMIT usageUpdated();
-    }
+  if (!std::isfinite(pct) || pct < 0.0 || pct > 100.0)
+    return;
+  m_sessionObservedAt = QDateTime::currentDateTimeUtc();
+  m_sessionPercentUsed = pct;
+  Q_EMIT usageUpdated();
 }
 void SubscriptionToolBackend::setHasSessionInfo(bool has)
 {
@@ -577,11 +572,11 @@ double SubscriptionToolBackend::tertiaryPercentRemaining() const { return m_tert
 QDateTime SubscriptionToolBackend::tertiaryResetDate() const { return m_tertiaryResetDate; }
 void SubscriptionToolBackend::setTertiaryPercentRemaining(double pct)
 {
-    const double normalized = qBound(0.0, pct, 100.0);
-    if (!qFuzzyCompare(m_tertiaryPercentRemaining + 1.0, normalized + 1.0)) {
-        m_tertiaryPercentRemaining = normalized;
-        Q_EMIT usageUpdated();
-    }
+  if (!std::isfinite(pct) || pct < 0.0 || pct > 100.0)
+    return;
+  m_tertiaryObservedAt = QDateTime::currentDateTimeUtc();
+  m_tertiaryPercentRemaining = pct;
+  Q_EMIT usageUpdated();
 }
 void SubscriptionToolBackend::setTertiaryResetDate(const QDateTime &date)
 {
@@ -654,8 +649,7 @@ int SubscriptionToolBackend::catalogDefaultLimitForPlan(const QString &plan) con
         }
     }
 
-    const QString planId = SubscriptionPlanCatalog::instance()->planIdForLabel(key, plan);
-    return localActivityFallbackLimit(key, planId.isEmpty() ? plan : planId);
+    return 0;
 }
 
 int SubscriptionToolBackend::catalogDefaultSecondaryLimitForPlan(const QString &plan) const
@@ -687,12 +681,9 @@ double SubscriptionToolBackend::catalogDefaultCostForPlan(const QString &plan) c
     }
 
     const QVariantMap price = SubscriptionPlanCatalog::instance()->price(key, plan);
-    if (price.contains(QStringLiteral("amount"))) {
-        return price.value(QStringLiteral("amount")).toDouble();
-    }
-    if (price.value(QStringLiteral("precision")).toString() == QLatin1String("official_range")
-        && price.contains(QStringLiteral("rangeMin"))) {
-        return price.value(QStringLiteral("rangeMin")).toDouble();
+    if (price.value(QStringLiteral("available"), true).toBool() &&
+        price.contains(QStringLiteral("amount"))) {
+      return price.value(QStringLiteral("amount")).toDouble();
     }
     return 0.0;
 }
@@ -715,6 +706,7 @@ QVariantList SubscriptionToolBackend::quotaWindows() const
     if (m_hasSessionInfo) {
         QVariantMap row;
         row.insert(QStringLiteral("kind"), QStringLiteral("browser_session"));
+        row.insert(QStringLiteral("observedAt"), m_sessionObservedAt);
         row.insert(QStringLiteral("label"), QStringLiteral("Current session"));
         row.insert(QStringLiteral("unit"), QStringLiteral("percent"));
         row.insert(QStringLiteral("percentUsed"), m_sessionPercentUsed);
@@ -747,6 +739,7 @@ QVariantList SubscriptionToolBackend::quotaWindows() const
     if (hasTertiaryLimit()) {
         QVariantMap row;
         row.insert(QStringLiteral("kind"), QStringLiteral("code_review"));
+        row.insert(QStringLiteral("observedAt"), m_tertiaryObservedAt);
         row.insert(QStringLiteral("label"), tertiaryPeriodLabel().isEmpty() ? QStringLiteral("Tertiary quota") : tertiaryPeriodLabel());
         row.insert(QStringLiteral("unit"), QStringLiteral("percent_remaining"));
         row.insert(QStringLiteral("percentRemaining"), m_tertiaryPercentRemaining);
@@ -823,10 +816,55 @@ QVariantList SubscriptionToolBackend::quotaWindows() const
 
 void SubscriptionToolBackend::setSyncedQuotaWindows(const QVariantList &windows)
 {
-    if (m_syncedQuotaWindows == windows) {
-        return;
+  // Merge by window identity: empty or malformed responses cannot refresh
+  // evidence.
+  for (const QVariant &value : windows) {
+    QVariantMap row = value.toMap();
+    bool valid = false;
+    for (const QString &field :
+         {QStringLiteral("percentUsed"), QStringLiteral("percentRemaining")}) {
+      if (!row.contains(field))
+        continue;
+      const QVariant number = row.value(field);
+      bool ok = false;
+      const double pct = number.toDouble(&ok);
+      if (number.isNull() ||
+          (number.metaType().id() == QMetaType::QString ||
+           number.metaType().id() == QMetaType::Bool) ||
+          !ok || !std::isfinite(pct) || pct < 0 || pct > 100) {
+        valid = false;
+        break;
+      }
+      valid = true;
     }
-    m_syncedQuotaWindows = windows;
+    if (row.contains(QStringLiteral("percentUsed")) &&
+        row.contains(QStringLiteral("percentRemaining")) &&
+        std::abs(row.value(QStringLiteral("percentUsed")).toDouble() +
+                 row.value(QStringLiteral("percentRemaining")).toDouble() -
+                 100.0) > 0.01)
+      valid = false;
+    if (!valid)
+      continue;
+    row.insert(QStringLiteral("observedAt"), QDateTime::currentDateTimeUtc());
+    bool replaced = false;
+    for (QVariant &old : m_syncedQuotaWindows) {
+      const auto previous = old.toMap();
+      if (previous.value(QStringLiteral("kind")) ==
+              row.value(QStringLiteral("kind")) &&
+          previous.value(QStringLiteral("window")) ==
+              row.value(QStringLiteral("window")) &&
+          previous.value(QStringLiteral("scope")) ==
+              row.value(QStringLiteral("scope")) &&
+          previous.value(QStringLiteral("source")) ==
+              row.value(QStringLiteral("source"))) {
+        old = row;
+        replaced = true;
+        break;
+      }
+    }
+    if (!replaced)
+      m_syncedQuotaWindows.append(row);
+  }
     Q_EMIT quotaWindowsChanged();
     Q_EMIT usageUpdated();
 }
@@ -885,4 +923,83 @@ QNetworkAccessManager *SubscriptionToolBackend::networkManager()
         m_networkManager = new QNetworkAccessManager(this);
     }
     return m_networkManager;
+}
+
+QVariantList
+SubscriptionToolBackend::quotaWindowsAt(const QDateTime &now) const {
+  QVariantList result;
+  for (const QVariant &value : quotaWindows()) {
+    QVariantMap row = value.toMap();
+    if (authenticatedQuotaSource(row)) {
+      const QDateTime observed =
+          row.value(QStringLiteral("observedAt")).toDateTime();
+      QDateTime reset = row.value(QStringLiteral("resetAt")).toDateTime();
+      if (!reset.isValid())
+        reset = QDateTime::fromString(
+            row.value(QStringLiteral("resetAt")).toString(), Qt::ISODate);
+      const QString reason =
+          !observed.isValid()               ? QStringLiteral("never_observed")
+          : reset.isValid() && reset <= now ? QStringLiteral("awaiting_refresh")
+          : observed > now || observed.secsTo(now) >= 900
+              ? QStringLiteral("stale")
+              : QStringLiteral("fresh");
+      row.insert(QStringLiteral("available"), reason == QLatin1String("fresh"));
+      row.insert(QStringLiteral("freshnessState"), reason);
+    }
+    result.append(row);
+  }
+  return result;
+}
+bool SubscriptionToolBackend::hasFreshQuota(const QDateTime &now) const {
+  for (const QVariant &value : quotaWindowsAt(now)) {
+    const auto row = value.toMap();
+    if (authenticatedQuotaSource(row) &&
+        row.value(QStringLiteral("available")).toBool())
+      return true;
+  }
+  return false;
+}
+QDateTime SubscriptionToolBackend::lastQuotaObservation() const {
+  QDateTime latest;
+  for (const QVariant &value : quotaWindows()) {
+    const QDateTime observed =
+        value.toMap().value(QStringLiteral("observedAt")).toDateTime();
+    if (observed.isValid() && (!latest.isValid() || observed > latest))
+      latest = observed;
+  }
+  return latest;
+}
+
+bool SubscriptionToolBackend::canAutoSync() const {
+  return canAutoSyncAt(QDateTime::currentDateTimeUtc());
+}
+
+bool SubscriptionToolBackend::canAutoSyncAt(const QDateTime &now) const {
+  return now.isValid() && !m_syncing && !m_syncNeedsAction &&
+         (!m_syncRetryAfter.isValid() || now >= m_syncRetryAfter);
+}
+
+void SubscriptionToolBackend::resetSyncRetry() {
+  m_syncNeedsAction = false;
+  m_syncRetryAfter = {};
+  m_syncFailures = 0;
+}
+
+void SubscriptionToolBackend::recordSyncHttpFailure(
+    int status, const QByteArray &retryAfter, const QDateTime &now) {
+  if (status == 401 || status == 403)
+    m_syncNeedsAction = true;
+  ++m_syncFailures;
+  QDateTime next = now.addSecs(60 * (1 << qMin(m_syncFailures - 1, 3)));
+  bool numeric = false;
+  const qint64 seconds = retryAfter.trimmed().toLongLong(&numeric);
+  QDateTime declared;
+  if (numeric && seconds >= 0 && seconds <= 31536000)
+    declared = now.addSecs(seconds);
+  else
+    declared =
+        QDateTime::fromString(QString::fromLatin1(retryAfter), Qt::RFC2822Date);
+  if (declared.isValid() && declared > next)
+    next = declared;
+  m_syncRetryAfter = next;
 }

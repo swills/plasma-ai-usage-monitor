@@ -1,8 +1,28 @@
 # Roadmap
 
-**Current release:** 19.0.1, Catalog Drift Reliability
+**Current release:** 20.0.0, Reliable Daily Quotas
 
-**Last updated:** 2026-08-17
+**Last updated:** 2026-09-07
+
+## Release in preparation: 20.0.0 Reliable Daily Quotas
+
+Make quota, reset, freshness, and recovery consistent across the panel, tooltip,
+Overview, and Source Detail. Reuse the prepared fixes in PRs #49 and #50, then:
+
+1. Separate authenticated quota freshness from local activity and select the
+   earliest reset independently of the lowest remaining quota.
+2. Consolidate daily presentation and qualify panel orientation, scaling,
+   localization, unavailable values, and real zeroes.
+3. Add per-entry subscription evidence lifecycle and distinguish account
+   entitlement, published pricing, and local activity targets.
+4. Produce repeatable isolated Plasma evidence for exact candidate qualification.
+5. Update user documentation and verify the release on Fedora before publication.
+
+The plan is finalized. Remaining CI, media, and physical desktop qualification
+are deferred to the v20 release stage by the owner; they are not marked passed.
+Implementation is in progress; publication remains pending. The detailed review, acceptance cases, and
+delivery phases are in the
+[v20 plan](docs/plans/PLASMA_AI_USAGE_MONITOR_V20_CODEX_PLAN.md).
 
 AI Usage Monitor remains a desktop-native, local-first Plasma widget. v19 adds
 verified cost intelligence, signed catalog activation, deterministic pricing
@@ -11,6 +31,13 @@ expiry behavior. It does not add provider writes, FX, inference, or a fourth
 popup tab.
 
 ## Current release
+
+### 20.0.0 Reliable Daily Quotas
+
+Prepared locally; publication is pending final qualification. Quota observation
+freshness, independently selected reset times, normalized tooltip presentation,
+and subscription evidence lifecycle are the focus. The versioned checklist
+records current evidence and remaining gates.
 
 ### 19.0.1 Catalog Drift Reliability
 

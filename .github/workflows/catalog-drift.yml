@@ -1,4 +1,4 @@
-name: Provider catalog drift
+name: Catalog evidence drift
 
 on:
   schedule:
@@ -23,12 +23,18 @@ jobs:
           python3 scripts/check_catalog_drift.py --network --strict-actionable-review \
             --format markdown --output catalog-drift-report.md
           status=$?
+          python3 scripts/check_subscription_drift.py --output subscription-drift-report.md
+          subscription_status=$?
+          cat subscription-drift-report.md >> catalog-drift-report.md
+          if [[ "$subscription_status" != "0" ]]; then status=1; fi
           echo "status=${status}" >> "$GITHUB_OUTPUT"
           exit 0
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: provider-catalog-drift-report
-          path: catalog-drift-report.md
+          path: |
+            catalog-drift-report.md
+            subscription-drift-report.md
           if-no-files-found: error
       - name: Update the single maintainer issue
         if: steps.drift.outputs.status != '0'

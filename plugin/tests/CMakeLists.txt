@@ -502,7 +502,7 @@ add_executable(test_refreshscheduler
     ${CMAKE_SOURCE_DIR}/plugin/refreshschedulermodel.cpp
 )
 target_include_directories(test_refreshscheduler PRIVATE ${CMAKE_SOURCE_DIR}/plugin)
-target_link_libraries(test_refreshscheduler PRIVATE Qt6::Core Qt6::Test)
+target_link_libraries(test_refreshscheduler PRIVATE Qt6::Core Qt6::Test Qt6::Network)
 add_test(NAME refreshscheduler COMMAND test_refreshscheduler)
 
 # --- SubscriptionToolBackend unit test ---

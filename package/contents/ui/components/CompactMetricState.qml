@@ -5,6 +5,7 @@ QtObject {
     id: state
 
     property var summary: ({})
+    property var presentationTime: new Date()
 
     property MetricAvailabilityFormatter formatter: MetricAvailabilityFormatter {}
 
@@ -30,7 +31,7 @@ QtObject {
 
     function relativeReset(value, nowValue) {
         var reset = new Date(value);
-        var now = nowValue ? new Date(nowValue) : new Date();
+        var now = nowValue !== undefined ? new Date(nowValue) : new Date(presentationTime);
         if (!Number.isFinite(reset.getTime()) || reset.getTime() <= now.getTime())
             return i18n("now");
         var minutes = Math.max(1, Math.ceil((reset.getTime() - now.getTime()) / 60000));

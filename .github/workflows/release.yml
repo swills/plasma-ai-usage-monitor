@@ -5,7 +5,10 @@ on:
 permissions:
   contents: write
 jobs:
+  candidate:
+    uses: ./.github/workflows/candidate.yml
   exact-tag-artifacts:
+    needs: candidate
     environment: release
     runs-on: ubuntu-latest
     container: fedora:44
@@ -15,6 +18,7 @@ jobs:
         with: { fetch-depth: 0 }
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - run: bash scripts/verify_exact_tag.sh "$GITHUB_REF_NAME"
+      - run: python3 scripts/check_release_media.py
       - run: mkdir -p dist && SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) bash scripts/package_source_tarball.sh --output-dir dist
       - run: SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) bash scripts/package_plasmoid.sh --output-dir dist
       - run: python3 scripts/generate_source_sbom.py --tag "$GITHUB_REF_NAME" --output dist/source.spdx.json

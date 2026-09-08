@@ -42,6 +42,7 @@ private Q_SLOTS:
     void pricingSchemaV7EstimatesWithoutFalsePrecision();
     void exactCacheWriteAndLifecycleFailuresAreUnavailable();
     void subscriptionCatalogLoads();
+    void subscriptionEvidenceBoundaries();
     void staleCatalogDetection();
     void invalidCatalogExposesStatus();
 };
@@ -218,6 +219,54 @@ void CatalogsTest::subscriptionCatalogLoads()
     const QVariantList creditsRows = catalog.billingModeQuotaWindows(QStringLiteral("github-copilot"), QStringLiteral("ai_credits_usage_based"));
     QVERIFY(!creditsRows.isEmpty());
     QCOMPARE(creditsRows.first().toMap().value(QStringLiteral("creditUsdValue")).toDouble(), 0.01);
+}
+
+void CatalogsTest::subscriptionEvidenceBoundaries() {
+  const QDate day(2026, 9, 7);
+  QVariantMap evidence{
+      {"reviewedAt", "2026-09-05"},
+      {"effectiveFrom", "2026-09-01"},
+      {"expiresAt", "2026-10-05"},
+      {"sourceRefs",
+       QVariantList{QVariantMap{{"label", "Official"},
+                                {"url", "https://example.com/pricing"},
+                                {"reviewedAt", "2026-09-05"}}}}};
+  QVariantMap entry{{"rangeMin", 10},
+                    {"rangeMax", 20},
+                    {"precision", "official_range"},
+                    {"evidence", evidence}};
+  auto result = SubscriptionPlanCatalog::evaluateEvidence(entry, day);
+  QVERIFY(result.value("available").toBool());
+  QVERIFY(!result.contains("amount"));
+  QCOMPARE(result.value("rangeMax").toInt(), 20);
+  QVERIFY(SubscriptionPlanCatalog::evaluateEvidence(entry, QDate(2026, 10, 5))
+              .value("available")
+              .toBool());
+  result = SubscriptionPlanCatalog::evaluateEvidence(entry, QDate(2026, 10, 6));
+  QCOMPARE(result.value("evidenceState").toString(), QStringLiteral("expired"));
+  QVERIFY(!result.contains("rangeMin"));
+  QCOMPARE(SubscriptionPlanCatalog::evaluateEvidence(entry, QDate(2026, 8, 31))
+               .value("evidenceState")
+               .toString(),
+           QStringLiteral("not_yet_effective"));
+  entry.remove("evidence");
+  QVERIFY(!SubscriptionPlanCatalog::evaluateEvidence(entry, day)
+               .value("available")
+               .toBool());
+  evidence.insert("expiresAt", "garbage");
+  entry.insert("evidence", evidence);
+  QCOMPARE(SubscriptionPlanCatalog::evaluateEvidence(entry, day)
+               .value("evidenceState")
+               .toString(),
+           QStringLiteral("invalid"));
+  evidence.insert("expiresAt", "2026-10-05");
+  entry.insert("evidence", evidence);
+  entry.insert("rangeMin", 21);
+  QVERIFY(!SubscriptionPlanCatalog::evaluateEvidence(entry, day)
+               .value("available")
+               .toBool());
+  SubscriptionPlanCatalog catalog;
+  QVERIFY(catalog.price("jetbrains-ai", "does-not-exist").isEmpty());
 }
 
 void CatalogsTest::staleCatalogDetection()

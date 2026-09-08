@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import os
@@ -14,7 +15,13 @@ from pathlib import Path
 from release_media_evidence import EvidenceError, validate_capture_evidence
 
 ROOT = Path(__file__).resolve().parents[1]
-SCREENSHOTS = ROOT / "assets" / "screenshots"
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--screenshots", type=Path, default=ROOT / "assets" / "screenshots")
+parser.add_argument("--mode", choices=("candidate", "development"), default="candidate",
+                    help="Candidate mode binds evidence to current source; development checks saved evidence integrity.")
+args = parser.parse_args()
+SCREENSHOTS = args.screenshots
+STRICT = args.mode == "candidate"
 REQUIRED = (
     "overview-popup.png",
     "attention-state.png",
@@ -162,7 +169,7 @@ manifest_path = SCREENSHOTS / "v18-media-manifest.json"
 if not manifest_path.is_file():
     fail("assets/screenshots/v18-media-manifest.json is missing")
 manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-if manifest.get("version") != expected_version:
+if STRICT and manifest.get("version") != expected_version:
     fail(
         f"manifest version {manifest.get('version')!r} does not match "
         f"release target {expected_version}"
@@ -200,7 +207,7 @@ expected_fixture = hashlib.sha256(
         )
     ).encode()
 ).hexdigest()
-if manifest["fixtureSha256"] != expected_fixture:
+if STRICT and manifest["fixtureSha256"] != expected_fixture:
     fail("manifest fixture hash does not match the v18 media fixtures")
 
 source_tree_commit = manifest["sourceTreeCommit"]
@@ -218,12 +225,12 @@ elif source_tree_mode == "filesystem-release-candidate":
 else:
     fail(f"unsupported sourceTreeMode {source_tree_mode!r}")
 if (
-    expected_source_tree is not None
+    STRICT and expected_source_tree is not None
     and manifest["sourceTreeSha256"] != expected_source_tree
 ):
     fail("manifest source tree hash does not match its recorded source")
 archive_source_tree = filesystem_source_tree_sha256()
-if manifest["archiveSourceTreeSha256"] != archive_source_tree:
+if STRICT and manifest["archiveSourceTreeSha256"] != archive_source_tree:
     fail("manifest archive source tree hash does not match the packaged source")
 if manifest.get("scenarios") != SCENARIOS:
     fail("manifest scenarios do not match the v18 capture contract")
@@ -267,6 +274,6 @@ source_identity = (
     else f"{manifest['sourceTreeSha256'][:12]} (filesystem release candidate)"
 )
 print(
-    f"Release media OK: {len(REQUIRED)} screenshots from session "
+    f"Release media OK ({args.mode}): {len(REQUIRED)} screenshots from session "
     f"{manifest['sessionId']} at source tree {source_identity}"
 )
