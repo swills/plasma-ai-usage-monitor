@@ -56,16 +56,16 @@ private Q_SLOTS:
 void SubscriptionToolsTest::planDefaults()
 {
     ClaudeCodeMonitor claude;
-    QCOMPARE(claude.defaultLimitForPlan(QStringLiteral("Pro")), 100);
-    QCOMPARE(claude.defaultLimitForPlan(QStringLiteral("Max 5x")), 500);
+    QCOMPARE(claude.defaultLimitForPlan(QStringLiteral("Pro")), 0);
+    QCOMPARE(claude.defaultLimitForPlan(QStringLiteral("Max 5x")), 0);
     QCOMPARE(claude.defaultSecondaryLimitForPlan(QStringLiteral("Max 5x")), 0);
     QCOMPARE(claude.defaultCostForPlan(QStringLiteral("Max 20x")), 200.0);
     claude.setPlanTier(QStringLiteral("max_20x"));
     QVERIFY(!claude.quotaWindows().isEmpty());
 
     CodexCliMonitor codex;
-    QCOMPARE(codex.defaultLimitForPlan(QStringLiteral("Plus")), 100);
-    QCOMPARE(codex.defaultLimitForPlan(QStringLiteral("Pro")), 1000);
+    QCOMPARE(codex.defaultLimitForPlan(QStringLiteral("Plus")), 0);
+    QCOMPARE(codex.defaultLimitForPlan(QStringLiteral("Pro")), 0);
     QCOMPARE(codex.defaultSecondaryLimitForPlan(QStringLiteral("Pro")), 0);
     QCOMPARE(codex.defaultCostForPlan(QStringLiteral("Pro $100")), 100.0);
     QCOMPARE(codex.defaultCostForPlan(QStringLiteral("Pro")), 200.0);
@@ -76,11 +76,11 @@ void SubscriptionToolsTest::planDefaults()
     QVERIFY(!codex.quotaWindows().isEmpty());
 
     CopilotMonitor copilot;
-    QCOMPARE(copilot.defaultLimitForPlan(QStringLiteral("Free")), 50);
-    QCOMPARE(copilot.defaultLimitForPlan(QStringLiteral("Pro")), 300);
-    QCOMPARE(copilot.defaultLimitForPlan(QStringLiteral("Pro+")), 1500);
-    QCOMPARE(copilot.defaultLimitForPlan(QStringLiteral("Business")), 300);
-    QCOMPARE(copilot.defaultLimitForPlan(QStringLiteral("Enterprise")), 1000);
+    QCOMPARE(copilot.defaultLimitForPlan(QStringLiteral("Free")), 0);
+    QCOMPARE(copilot.defaultLimitForPlan(QStringLiteral("Pro")), 0);
+    QCOMPARE(copilot.defaultLimitForPlan(QStringLiteral("Pro+")), 0);
+    QCOMPARE(copilot.defaultLimitForPlan(QStringLiteral("Business")), 0);
+    QCOMPARE(copilot.defaultLimitForPlan(QStringLiteral("Enterprise")), 0);
     QCOMPARE(copilot.defaultCostForPlan(QStringLiteral("Pro+")), 39.0);
     QCOMPARE(copilot.defaultCostForPlan(QStringLiteral("Business")), 19.0);
 }

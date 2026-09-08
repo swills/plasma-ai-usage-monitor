@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION")
+
 file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" PROJECT_VERSION_VALUE
      LIMIT_COUNT 1 REGEX "^[0-9]+\\.[0-9]+\\.[0-9]+$")
 if(NOT PROJECT_VERSION_VALUE)
@@ -23,7 +25,11 @@ include(KDECompilerSettings NO_POLICY_SCOPE)
 find_package(Qt6 REQUIRED COMPONENTS Core Qml Quick Network Sql Concurrent)
 qt_policy(SET QTP0001 NEW)
 find_package(OpenSSL REQUIRED)
-find_package(Protobuf REQUIRED)
+set(protobuf_MODULE_COMPATIBLE ON)
+find_package(Protobuf CONFIG QUIET)
+if(NOT Protobuf_FOUND)
+    find_package(Protobuf REQUIRED)
+endif()
 find_package(Plasma REQUIRED)
 find_package(KF6Wallet REQUIRED)
 find_package(KF6Notifications REQUIRED)
@@ -51,6 +57,12 @@ if(BUILD_TESTING)
                 AI_USAGE_MONITOR_MEDIA_FORCE_FILESYSTEM=1
                 "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/check_release_media.py"
     )
+    set_tests_properties(release_media release_media_source_archive
+        PROPERTIES LABELS "release-candidate")
+    add_test(NAME protobuf_discovery
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/test_protobuf_discovery.py")
+    add_test(NAME subscription_evidence
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/test_subscription_catalog.py")
     add_test(
         NAME kcm_contracts
         COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/check_kcm_contracts.py"

@@ -130,6 +130,35 @@ KCM.SimpleKCM {
     }
 
     Kirigami.FormLayout {
+        QQC2.Label {
+            Kirigami.FormData.label: i18n("Subscription evidence:")
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            text: i18n("Expired or unreviewed public prices and allowances are unavailable. Account entitlement requires authenticated usage data.")
+        }
+        Repeater {
+            model: SubscriptionPlanCatalog.evidenceReviewItems()
+            delegate: ColumnLayout {
+                id: evidenceRow
+                required property var modelData
+                Layout.fillWidth: true
+                QQC2.Label {
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    text: evidenceRow.modelData.key + " / " + evidenceRow.modelData.planId + " — " + evidenceRow.modelData.label + ": " + evidenceRow.modelData.reviewReason
+                }
+                Repeater {
+                    model: evidenceRow.modelData.sourceRefs || []
+                    delegate: QQC2.Button {
+                        id: evidenceSource
+                        required property var modelData
+                        text: evidenceSource.modelData.label
+                        onClicked: Qt.openUrlExternally(evidenceSource.modelData.url)
+                    }
+                }
+            }
+        }
+
         anchors.fill: parent
 
         Kirigami.Separator {

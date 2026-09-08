@@ -3,6 +3,9 @@ on:
   pull_request:
   push:
     branches: [main]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
@@ -12,6 +15,7 @@ jobs:
     steps:
       - run: dnf install -y git python3 tar gzip
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - run: mkdir -p dist && SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) bash scripts/package_source_tarball.sh --output-dir dist
       - run: SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) bash scripts/package_plasmoid.sh --output-dir dist
       - run: python3 scripts/check_package_payload.py

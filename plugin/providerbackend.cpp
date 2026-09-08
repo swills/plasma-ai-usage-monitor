@@ -1000,14 +1000,25 @@ int ProviderBackend::currentGeneration() const
 
 bool ProviderBackend::requestRefresh(RefreshReason reason)
 {
-    if (m_loading) {
-        if (reason != RefreshReason::Manual) {
-            ++m_coalescedRefreshCount;
-            Q_EMIT diagnosticsChanged();
-            return false;
-        }
-        cancelRefresh();
+  const bool automatic = reason == RefreshReason::Scheduled ||
+                         reason == RefreshReason::PopupOpened ||
+                         reason == RefreshReason::Retry;
+  if (automatic && (m_errorKind == ProviderErrorKind::Authentication ||
+                    m_errorKind == ProviderErrorKind::Permission ||
+                    m_errorKind == ProviderErrorKind::Configuration ||
+                    m_errorKind == ProviderErrorKind::Schema ||
+                    m_errorKind == ProviderErrorKind::Unsupported))
+    return false;
+  if (m_retryAfter.isValid() && m_retryAfter > QDateTime::currentDateTimeUtc())
+    return false;
+  if (m_loading) {
+    if (reason != RefreshReason::Manual) {
+      ++m_coalescedRefreshCount;
+      Q_EMIT diagnosticsChanged();
+      return false;
     }
+    cancelRefresh();
+  }
 
     m_pendingRefreshReason = reason;
     refreshImpl();

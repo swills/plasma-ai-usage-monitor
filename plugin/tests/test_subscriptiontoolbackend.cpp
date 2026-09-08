@@ -32,15 +32,19 @@ public:
     QString secondaryPeriodLabel() const override { return QStringLiteral("weekly"); }
 
     // Expose protected methods
-    using SubscriptionToolBackend::setInstalled;
-    using SubscriptionToolBackend::setUsageCount;
-    using SubscriptionToolBackend::setSecondaryUsageCount;
-    using SubscriptionToolBackend::setPeriodStart;
-    using SubscriptionToolBackend::setSecondaryPeriodStart;
     using SubscriptionToolBackend::calculatePeriodEnd;
     using SubscriptionToolBackend::checkAndResetPeriod;
+    using SubscriptionToolBackend::recordSyncHttpFailure;
+    using SubscriptionToolBackend::setHasSessionInfo;
+    using SubscriptionToolBackend::setInstalled;
+    using SubscriptionToolBackend::setPeriodStart;
+    using SubscriptionToolBackend::setSecondaryPeriodStart;
+    using SubscriptionToolBackend::setSecondaryUsageCount;
+    using SubscriptionToolBackend::setSessionPercentUsed;
+    using SubscriptionToolBackend::setSyncedQuotaWindows;
+    using SubscriptionToolBackend::setUsageCount;
 
-protected:
+  protected:
     UsagePeriod primaryPeriodType() const override { return FiveHour; }
     UsagePeriod secondaryPeriodType() const override { return Weekly; }
 
@@ -53,24 +57,81 @@ class SubscriptionToolBackendTest : public QObject
     Q_OBJECT
 
 private Q_SLOTS:
-    void testIncrementUsage();
-    void testResetUsage();
-    void testPercentUsed();
-    void testLimitReached();
-    void testLimitReachedSignal();
-    void testLimitWarningSignal();
-    void testCalculatePeriodEndFiveHour();
-    void testCalculatePeriodEndDaily();
-    void testCalculatePeriodEndWeekly();
-    void testCalculatePeriodEndMonthly();
-    void testCalculatePeriodEndMonthlyCustomResetDay();
-    void testCalculatePeriodEndInvalidStart();
-    void testSecondaryUsageTracking();
-    void testCheckAndResetPeriod();
-    void testDefaultLimitForPlan();
-    void testTimeUntilResetFormat();
-    void testQuotaWindowsAndNotify();
+  void testAutomaticSyncRetryPolicy();
+  void testQuotaIdentityAndMalformedValues();
+  void testEqualSessionObservationNotifies();
+  void testIncrementUsage();
+  void testResetUsage();
+  void testPercentUsed();
+  void testLimitReached();
+  void testLimitReachedSignal();
+  void testLimitWarningSignal();
+  void testCalculatePeriodEndFiveHour();
+  void testCalculatePeriodEndDaily();
+  void testCalculatePeriodEndWeekly();
+  void testCalculatePeriodEndMonthly();
+  void testCalculatePeriodEndMonthlyCustomResetDay();
+  void testCalculatePeriodEndInvalidStart();
+  void testSecondaryUsageTracking();
+  void testCheckAndResetPeriod();
+  void testDefaultLimitForPlan();
+  void testTimeUntilResetFormat();
+  void testQuotaWindowsAndNotify();
 };
+
+void SubscriptionToolBackendTest::testAutomaticSyncRetryPolicy() {
+  TestToolBackend tool;
+  const auto now = QDateTime::currentDateTimeUtc();
+  QVERIFY(tool.canAutoSyncAt(now));
+  tool.recordSyncHttpFailure(429, "120", now);
+  QVERIFY(!tool.canAutoSyncAt(now.addSecs(119)));
+  QVERIFY(tool.canAutoSyncAt(now.addSecs(120)));
+  tool.recordSyncHttpFailure(401, {}, now);
+  QVERIFY(!tool.canAutoSyncAt(now.addDays(1)));
+  tool.resetSyncRetry();
+  tool.recordSyncHttpFailure(0, {}, now);
+  QVERIFY(!tool.canAutoSyncAt(now.addSecs(59)));
+  QVERIFY(tool.canAutoSyncAt(now.addSecs(60)));
+  Q_EMIT tool.syncCompleted(true, QString());
+  QVERIFY(tool.canAutoSyncAt(now));
+}
+
+void SubscriptionToolBackendTest::testQuotaIdentityAndMalformedValues() {
+  TestToolBackend tool;
+  QVariantMap first{{"kind", "quota"},
+                    {"window", "five_hour"},
+                    {"source", "browser_sync"},
+                    {"percentRemaining", 0.0}};
+  QVariantMap second = first;
+  second.insert("window", "weekly");
+  second.insert("percentRemaining", 50.0);
+  tool.setSyncedQuotaWindows({first, second});
+  QCOMPARE(tool.quotaWindows().size(),
+           2); // No local activity or configured target.
+  const auto observed = tool.lastQuotaObservation();
+  for (const QVariant &invalid : {QVariant(true), QVariant("10"), QVariant(),
+                                  QVariant(-1), QVariant(101)}) {
+    auto malformed = first;
+    malformed.insert("percentRemaining", invalid);
+    tool.setSyncedQuotaWindows({malformed});
+  }
+  auto inconsistent = first;
+  inconsistent.insert("percentUsed", 1.0);
+  tool.setSyncedQuotaWindows({inconsistent});
+  QCOMPARE(tool.lastQuotaObservation(), observed);
+  QCOMPARE(
+      tool.quotaWindows().first().toMap().value("percentRemaining").toDouble(),
+      0.0);
+}
+
+void SubscriptionToolBackendTest::testEqualSessionObservationNotifies() {
+  TestToolBackend tool;
+  tool.setHasSessionInfo(true);
+  tool.setSessionPercentUsed(0);
+  QSignalSpy spy(&tool, &SubscriptionToolBackend::usageUpdated);
+  tool.setSessionPercentUsed(0);
+  QCOMPARE(spy.size(), 1);
+}
 
 void SubscriptionToolBackendTest::testIncrementUsage()
 {

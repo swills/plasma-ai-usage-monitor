@@ -78,3 +78,27 @@ print(
     "Release media evidence tests OK: "
     "isolated capture enforced; wrong window, marker, and AT-SPI process rejected"
 )
+
+# Development mode must still reject damaged assets; only current-tree binding
+# is deferred to candidate qualification.
+import json
+import shutil
+import subprocess
+import sys
+import tempfile
+
+with tempfile.TemporaryDirectory(prefix="media-evidence-") as directory:
+    screenshots = Path(directory) / "screenshots"
+    shutil.copytree(ROOT / "assets/screenshots", screenshots)
+    manifest_path = screenshots / "v18-media-manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    manifest["assets"][asset] = "0" * 64
+    manifest_path.write_text(json.dumps(manifest))
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "scripts/check_release_media.py"),
+         "--mode", "development", "--screenshots", str(screenshots)],
+        capture_output=True, text=True,
+    )
+    if result.returncode == 0 or "manifest hash does not match" not in result.stderr:
+        raise SystemExit("Development media validation failed to reject damaged asset evidence")
+print("Development media integrity regression PASS")

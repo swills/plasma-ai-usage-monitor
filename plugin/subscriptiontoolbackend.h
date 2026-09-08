@@ -196,7 +196,13 @@ public:
     virtual bool hasCredits() const;
     int remainingCredits() const;
 
+    Q_INVOKABLE bool canAutoSync() const;
+    bool canAutoSyncAt(const QDateTime &now) const;
+    Q_INVOKABLE void resetSyncRetry();
     QVariantList quotaWindows() const;
+    QVariantList quotaWindowsAt(const QDateTime &now) const;
+    bool hasFreshQuota(const QDateTime &now) const;
+    QDateTime lastQuotaObservation() const;
 
     // Actions
     Q_INVOKABLE void incrementUsage();
@@ -229,43 +235,47 @@ Q_SIGNALS:
     void activityDetected(const QString &tool);
 
 protected:
-    void setInstalled(bool installed);
-    void setUsageCount(int count);
-    void setSecondaryUsageCount(int count);
-    void setPeriodStart(const QDateTime &start);
-    void setSecondaryPeriodStart(const QDateTime &start);
-    void setLastActivity(const QDateTime &time);
+  void
+  recordSyncHttpFailure(int status, const QByteArray &retryAfter,
+                        const QDateTime &now = QDateTime::currentDateTimeUtc());
+  void setInstalled(bool installed);
+  void setUsageCount(int count);
+  void setSecondaryUsageCount(int count);
+  void setPeriodStart(const QDateTime &start);
+  void setSecondaryPeriodStart(const QDateTime &start);
+  void setLastActivity(const QDateTime &time);
 
-    // Sync helpers for subclasses
-    void setSyncing(bool syncing);
-    void setSyncStatus(const QString &status);
-    void setLastSyncTime(const QDateTime &time);
-    void setSessionPercentUsed(double pct);
-    void setHasSessionInfo(bool has);
-    void setExtraUsageSpent(double spent);
-    void setExtraUsageLimit(double limit);
-    void setExtraUsageResetDate(const QDateTime &date);
-    void setCurrencySymbol(const QString &symbol);
-    void setHasExtraUsage(bool has);
-    void setTertiaryPercentRemaining(double pct);
-    void setTertiaryResetDate(const QDateTime &date);
-    void setRemainingCredits(int credits);
-    void setSubscriptionCostValue(double cost);
-    void setSyncedQuotaWindows(const QVariantList &windows);
+  // Sync helpers for subclasses
+  void setSyncing(bool syncing);
+  void setSyncStatus(const QString &status);
+  void setLastSyncTime(const QDateTime &time);
+  void setSessionPercentUsed(double pct);
+  void setHasSessionInfo(bool has);
+  void setExtraUsageSpent(double spent);
+  void setExtraUsageLimit(double limit);
+  void setExtraUsageResetDate(const QDateTime &date);
+  void setCurrencySymbol(const QString &symbol);
+  void setHasExtraUsage(bool has);
+  void setTertiaryPercentRemaining(double pct);
+  void setTertiaryResetDate(const QDateTime &date);
+  void setRemainingCredits(int credits);
+  void setSubscriptionCostValue(double cost);
+  void setSyncedQuotaWindows(const QVariantList &windows);
 
-    // Period management
-    virtual UsagePeriod primaryPeriodType() const = 0;
-    virtual UsagePeriod secondaryPeriodType() const;
-    virtual QString catalogToolKey() const;
-    virtual QString catalogBillingMode() const;
-    QStringList catalogPlanLabels() const;
-    int catalogDefaultLimitForPlan(const QString &plan) const;
-    int catalogDefaultSecondaryLimitForPlan(const QString &plan) const;
-    double catalogDefaultCostForPlan(const QString &plan) const;
-    void checkAndResetPeriod();
-    QDateTime calculatePeriodEnd(UsagePeriod period, const QDateTime &start) const;
+  // Period management
+  virtual UsagePeriod primaryPeriodType() const = 0;
+  virtual UsagePeriod secondaryPeriodType() const;
+  virtual QString catalogToolKey() const;
+  virtual QString catalogBillingMode() const;
+  QStringList catalogPlanLabels() const;
+  int catalogDefaultLimitForPlan(const QString &plan) const;
+  int catalogDefaultSecondaryLimitForPlan(const QString &plan) const;
+  double catalogDefaultCostForPlan(const QString &plan) const;
+  void checkAndResetPeriod();
+  QDateTime calculatePeriodEnd(UsagePeriod period,
+                               const QDateTime &start) const;
 
-    QNetworkAccessManager *networkManager();
+  QNetworkAccessManager *networkManager();
 
 private:
     void checkLimitWarnings();
@@ -303,8 +313,13 @@ private:
     // Credits
     int m_remainingCredits = 0;
     QVariantList m_syncedQuotaWindows;
+    QDateTime m_sessionObservedAt;
+    QDateTime m_tertiaryObservedAt;
 
     // Sync state
+    QDateTime m_syncRetryAfter;
+    bool m_syncNeedsAction = false;
+    int m_syncFailures = 0;
     bool m_syncEnabled = false;
     bool m_syncing = false;
     QString m_syncStatus;

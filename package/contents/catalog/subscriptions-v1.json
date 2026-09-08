@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": "2026.07.18",
-  "release": "19.0.1",
-  "lastReviewed": "2026-07-18",
+  "catalogVersion": "2026.09.05",
+  "release": "20.0.0",
+  "lastReviewed": "2026-09-05",
   "runtimeScraping": false,
-  "notes": "Static local metadata for shipped subscription defaults. Live local-auth, local-daemon, or browser sync may override presets with actual account data. Do not scrape vendor pages at runtime. Entries were re-reviewed on 2026-07-18; review/conflict flags include user-visible reasons in Diagnostics.",
+  "notes": "Static local metadata reviewed against official sources on 2026-09-05. Live authenticated account data takes precedence. Unverified promotional allowances and account-specific prices remain unavailable. See docs/reviews/subscription-catalog-2026-09-05.md. No runtime scraping.",
   "tools": [
     {
       "key": "google-antigravity",
@@ -18,27 +18,55 @@
         {
           "label": "Antigravity plans",
           "url": "https://antigravity.google/docs/plans?hl=en",
-          "reviewedAt": "2026-07-18"
+          "reviewedAt": "2026-09-05"
         },
         {
           "label": "Antigravity models",
           "url": "https://antigravity.google/docs/models",
-          "reviewedAt": "2026-07-18"
+          "reviewedAt": "2026-09-05"
         },
         {
           "label": "Antigravity plan changes",
           "url": "https://antigravity.google/blog/changes-to-antigravity-plans",
-          "reviewedAt": "2026-07-18"
+          "reviewedAt": "2026-09-05"
         }
       ],
       "plans": [
-        { "id": "standard", "label": "Google AI Standard", "quotaWindows": [] },
-        { "id": "pro", "label": "Google AI Pro", "quotaWindows": [] },
-        { "id": "ultra", "label": "Google AI Ultra", "quotaWindows": [] },
-        { "id": "ultra_5x", "label": "Google AI Ultra 5x", "quotaWindows": [] },
-        { "id": "ultra_20x", "label": "Google AI Ultra 20x", "quotaWindows": [] },
-        { "id": "enterprise", "label": "Google Antigravity Enterprise", "quotaWindows": [] },
-        { "id": "unknown", "label": "Unknown plan", "quotaWindows": [] }
+        {
+          "id": "standard",
+          "label": "Google AI Standard",
+          "quotaWindows": []
+        },
+        {
+          "id": "pro",
+          "label": "Google AI Pro",
+          "quotaWindows": []
+        },
+        {
+          "id": "ultra",
+          "label": "Google AI Ultra",
+          "quotaWindows": []
+        },
+        {
+          "id": "ultra_5x",
+          "label": "Google AI Ultra 5x",
+          "quotaWindows": []
+        },
+        {
+          "id": "ultra_20x",
+          "label": "Google AI Ultra 20x",
+          "quotaWindows": []
+        },
+        {
+          "id": "enterprise",
+          "label": "Google Antigravity Enterprise",
+          "quotaWindows": []
+        },
+        {
+          "id": "unknown",
+          "label": "Unknown plan",
+          "quotaWindows": []
+        }
       ],
       "reviewReason": "Plan identity and per-model quota are detected from the authenticated local Antigravity daemon. No static model matrix or numeric quota is treated as authoritative."
     },
@@ -54,22 +82,22 @@
         {
           "label": "Claude pricing",
           "url": "https://claude.com/pricing",
-          "reviewedAt": "2026-06-30"
+          "reviewedAt": "2026-09-05"
         },
         {
           "label": "Use Claude Code with Pro or Max",
           "url": "https://support.claude.com/en/articles/11145838-use-claude-code-with-your-pro-or-max-plan",
-          "reviewedAt": "2026-06-30"
+          "reviewedAt": "2026-09-05"
         },
         {
           "label": "Claude Pro usage limits",
           "url": "https://support.claude.com/en/articles/8325606-what-is-the-pro-plan",
-          "reviewedAt": "2026-06-30"
+          "reviewedAt": "2026-09-05"
         },
         {
           "label": "Claude Max usage limits",
           "url": "https://support.claude.com/en/articles/11049741-what-is-the-max-plan",
-          "reviewedAt": "2026-06-30"
+          "reviewedAt": "2026-09-05"
         }
       ],
       "plans": [
@@ -80,7 +108,34 @@
             "amount": 20,
             "currency": "USD",
             "period": "month",
-            "precision": "official_exact"
+            "precision": "official_exact",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Claude pricing",
+                  "url": "https://claude.com/pricing",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Use Claude Code with Pro or Max",
+                  "url": "https://support.claude.com/en/articles/11145838-use-claude-code-with-your-pro-or-max-plan",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Claude Pro usage limits",
+                  "url": "https://support.claude.com/en/articles/8325606-what-is-the-pro-plan",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Claude Max usage limits",
+                  "url": "https://support.claude.com/en/articles/11049741-what-is-the-max-plan",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
@@ -96,21 +151,75 @@
               "visibleByDefault": true,
               "notes": [
                 "Exact message counts vary by prompt length, attachments, conversation length, model, feature, and capacity."
-              ]
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Claude pricing",
+                    "url": "https://claude.com/pricing",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Use Claude Code with Pro or Max",
+                    "url": "https://support.claude.com/en/articles/11145838-use-claude-code-with-your-pro-or-max-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Claude Pro usage limits",
+                    "url": "https://support.claude.com/en/articles/8325606-what-is-the-pro-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Claude Max usage limits",
+                    "url": "https://support.claude.com/en/articles/11049741-what-is-the-max-plan",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             },
             {
               "kind": "rolling_weekly",
               "label": "Weekly all-model usage",
               "unit": "usage",
               "reset": {
-                "type": "rolling_7d_from_session_start"
+                "type": "vendor_provided_reset_at"
               },
               "precision": "official_qualitative",
               "source": "official_preset",
               "visibleByDefault": true,
               "notes": [
-                "Pro weekly usage applies across all models and resets seven days after the session starts."
-              ]
+                "Weekly reset time is account-specific; use the authenticated source's reset timestamp."
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Claude pricing",
+                    "url": "https://claude.com/pricing",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Use Claude Code with Pro or Max",
+                    "url": "https://support.claude.com/en/articles/11145838-use-claude-code-with-your-pro-or-max-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Claude Pro usage limits",
+                    "url": "https://support.claude.com/en/articles/8325606-what-is-the-pro-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Claude Max usage limits",
+                    "url": "https://support.claude.com/en/articles/11049741-what-is-the-max-plan",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             },
             {
               "kind": "extra_spend",
@@ -121,7 +230,34 @@
               "visibleByDefault": false,
               "notes": [
                 "Shown when browser sync returns account extra-usage data."
-              ]
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Claude pricing",
+                    "url": "https://claude.com/pricing",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Use Claude Code with Pro or Max",
+                    "url": "https://support.claude.com/en/articles/11145838-use-claude-code-with-your-pro-or-max-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Claude Pro usage limits",
+                    "url": "https://support.claude.com/en/articles/8325606-what-is-the-pro-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Claude Max usage limits",
+                    "url": "https://support.claude.com/en/articles/11049741-what-is-the-max-plan",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ],
           "notes": [
@@ -135,7 +271,34 @@
             "amount": 100,
             "currency": "USD",
             "period": "month",
-            "precision": "official_exact"
+            "precision": "official_exact",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Claude pricing",
+                  "url": "https://claude.com/pricing",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Use Claude Code with Pro or Max",
+                  "url": "https://support.claude.com/en/articles/11145838-use-claude-code-with-your-pro-or-max-plan",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Claude Pro usage limits",
+                  "url": "https://support.claude.com/en/articles/8325606-what-is-the-pro-plan",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Claude Max usage limits",
+                  "url": "https://support.claude.com/en/articles/11049741-what-is-the-max-plan",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
@@ -152,29 +315,116 @@
               "visibleByDefault": true,
               "notes": [
                 "5x more usage per session than Pro."
-              ]
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Claude pricing",
+                    "url": "https://claude.com/pricing",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Use Claude Code with Pro or Max",
+                    "url": "https://support.claude.com/en/articles/11145838-use-claude-code-with-your-pro-or-max-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Claude Pro usage limits",
+                    "url": "https://support.claude.com/en/articles/8325606-what-is-the-pro-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Claude Max usage limits",
+                    "url": "https://support.claude.com/en/articles/11049741-what-is-the-max-plan",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             },
             {
               "kind": "rolling_weekly",
               "label": "Weekly all-model usage",
               "unit": "usage",
               "reset": {
-                "type": "rolling_7d_from_session_start"
+                "type": "vendor_provided_reset_at"
               },
               "precision": "official_qualitative",
               "source": "official_preset",
-              "visibleByDefault": true
+              "visibleByDefault": true,
+              "notes": [
+                "Weekly reset time is account-specific; use the authenticated source's reset timestamp."
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Claude pricing",
+                    "url": "https://claude.com/pricing",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Use Claude Code with Pro or Max",
+                    "url": "https://support.claude.com/en/articles/11145838-use-claude-code-with-your-pro-or-max-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Claude Pro usage limits",
+                    "url": "https://support.claude.com/en/articles/8325606-what-is-the-pro-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Claude Max usage limits",
+                    "url": "https://support.claude.com/en/articles/11049741-what-is-the-max-plan",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             },
             {
               "kind": "rolling_weekly",
               "label": "Weekly Sonnet usage",
               "unit": "usage",
               "reset": {
-                "type": "rolling_7d_from_session_start"
+                "type": "vendor_provided_reset_at"
               },
               "precision": "official_qualitative",
               "source": "official_preset",
-              "visibleByDefault": true
+              "visibleByDefault": true,
+              "notes": [
+                "Weekly reset time is account-specific; use the authenticated source's reset timestamp."
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Claude pricing",
+                    "url": "https://claude.com/pricing",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Use Claude Code with Pro or Max",
+                    "url": "https://support.claude.com/en/articles/11145838-use-claude-code-with-your-pro-or-max-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Claude Pro usage limits",
+                    "url": "https://support.claude.com/en/articles/8325606-what-is-the-pro-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Claude Max usage limits",
+                    "url": "https://support.claude.com/en/articles/11049741-what-is-the-max-plan",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ],
           "notes": [
@@ -188,7 +438,34 @@
             "amount": 200,
             "currency": "USD",
             "period": "month",
-            "precision": "official_exact"
+            "precision": "official_exact",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Claude pricing",
+                  "url": "https://claude.com/pricing",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Use Claude Code with Pro or Max",
+                  "url": "https://support.claude.com/en/articles/11145838-use-claude-code-with-your-pro-or-max-plan",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Claude Pro usage limits",
+                  "url": "https://support.claude.com/en/articles/8325606-what-is-the-pro-plan",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Claude Max usage limits",
+                  "url": "https://support.claude.com/en/articles/11049741-what-is-the-max-plan",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
@@ -205,29 +482,116 @@
               "visibleByDefault": true,
               "notes": [
                 "20x more usage per session than Pro."
-              ]
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Claude pricing",
+                    "url": "https://claude.com/pricing",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Use Claude Code with Pro or Max",
+                    "url": "https://support.claude.com/en/articles/11145838-use-claude-code-with-your-pro-or-max-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Claude Pro usage limits",
+                    "url": "https://support.claude.com/en/articles/8325606-what-is-the-pro-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Claude Max usage limits",
+                    "url": "https://support.claude.com/en/articles/11049741-what-is-the-max-plan",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             },
             {
               "kind": "rolling_weekly",
               "label": "Weekly all-model usage",
               "unit": "usage",
               "reset": {
-                "type": "rolling_7d_from_session_start"
+                "type": "vendor_provided_reset_at"
               },
               "precision": "official_qualitative",
               "source": "official_preset",
-              "visibleByDefault": true
+              "visibleByDefault": true,
+              "notes": [
+                "Weekly reset time is account-specific; use the authenticated source's reset timestamp."
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Claude pricing",
+                    "url": "https://claude.com/pricing",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Use Claude Code with Pro or Max",
+                    "url": "https://support.claude.com/en/articles/11145838-use-claude-code-with-your-pro-or-max-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Claude Pro usage limits",
+                    "url": "https://support.claude.com/en/articles/8325606-what-is-the-pro-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Claude Max usage limits",
+                    "url": "https://support.claude.com/en/articles/11049741-what-is-the-max-plan",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             },
             {
               "kind": "rolling_weekly",
               "label": "Weekly Sonnet usage",
               "unit": "usage",
               "reset": {
-                "type": "rolling_7d_from_session_start"
+                "type": "vendor_provided_reset_at"
               },
               "precision": "official_qualitative",
               "source": "official_preset",
-              "visibleByDefault": true
+              "visibleByDefault": true,
+              "notes": [
+                "Weekly reset time is account-specific; use the authenticated source's reset timestamp."
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Claude pricing",
+                    "url": "https://claude.com/pricing",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Use Claude Code with Pro or Max",
+                    "url": "https://support.claude.com/en/articles/11145838-use-claude-code-with-your-pro-or-max-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Claude Pro usage limits",
+                    "url": "https://support.claude.com/en/articles/8325606-what-is-the-pro-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Claude Max usage limits",
+                    "url": "https://support.claude.com/en/articles/11049741-what-is-the-max-plan",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ],
           "notes": [
@@ -248,17 +612,17 @@
         {
           "label": "Using Codex with your ChatGPT plan",
           "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
-          "reviewedAt": "2026-06-30"
+          "reviewedAt": "2026-09-05"
         },
         {
           "label": "About ChatGPT Pro tiers",
           "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
-          "reviewedAt": "2026-06-30"
+          "reviewedAt": "2026-09-05"
         },
         {
           "label": "Using Credits for Flexible Usage in ChatGPT",
           "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
-          "reviewedAt": "2026-06-30"
+          "reviewedAt": "2026-09-05"
         }
       ],
       "plans": [
@@ -267,7 +631,29 @@
           "label": "Free",
           "price": {
             "status": "included",
-            "precision": "official_qualitative"
+            "precision": "official_qualitative",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Using Codex with your ChatGPT plan",
+                  "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "About ChatGPT Pro tiers",
+                  "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Using Credits for Flexible Usage in ChatGPT",
+                  "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
@@ -278,8 +664,30 @@
               "source": "official_preset",
               "visibleByDefault": true,
               "notes": [
-                "Included for a limited time. Exact limits are dynamic."
-              ]
+                "Codex is included; usage limits depend on the account and plan."
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Using Codex with your ChatGPT plan",
+                    "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About ChatGPT Pro tiers",
+                    "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Using Credits for Flexible Usage in ChatGPT",
+                    "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ]
         },
@@ -288,7 +696,29 @@
           "label": "Go",
           "price": {
             "status": "varies_by_region",
-            "precision": "official_qualitative"
+            "precision": "official_qualitative",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Using Codex with your ChatGPT plan",
+                  "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "About ChatGPT Pro tiers",
+                  "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Using Credits for Flexible Usage in ChatGPT",
+                  "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
@@ -299,8 +729,30 @@
               "source": "official_preset",
               "visibleByDefault": true,
               "notes": [
-                "Included for a limited time. Exact limits are dynamic."
-              ]
+                "Codex is included; usage limits depend on the account and plan."
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Using Codex with your ChatGPT plan",
+                    "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About ChatGPT Pro tiers",
+                    "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Using Credits for Flexible Usage in ChatGPT",
+                    "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ]
         },
@@ -309,7 +761,29 @@
           "label": "Plus",
           "price": {
             "status": "plan_pricing",
-            "precision": "official_qualitative"
+            "precision": "official_qualitative",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Using Codex with your ChatGPT plan",
+                  "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "About ChatGPT Pro tiers",
+                  "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Using Credits for Flexible Usage in ChatGPT",
+                  "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
@@ -324,7 +798,29 @@
               "visibleByDefault": true,
               "notes": [
                 "Usage depends on task complexity and local versus cloud execution."
-              ]
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Using Codex with your ChatGPT plan",
+                    "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About ChatGPT Pro tiers",
+                    "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Using Credits for Flexible Usage in ChatGPT",
+                    "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             },
             {
               "kind": "cloud_tasks",
@@ -335,7 +831,29 @@
               },
               "precision": "official_qualitative",
               "source": "official_preset",
-              "visibleByDefault": true
+              "visibleByDefault": true,
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Using Codex with your ChatGPT plan",
+                    "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About ChatGPT Pro tiers",
+                    "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Using Credits for Flexible Usage in ChatGPT",
+                    "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             },
             {
               "kind": "code_review",
@@ -346,7 +864,29 @@
               },
               "precision": "browser_sync_actual",
               "source": "browser_sync",
-              "visibleByDefault": false
+              "visibleByDefault": false,
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Using Codex with your ChatGPT plan",
+                    "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About ChatGPT Pro tiers",
+                    "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Using Credits for Flexible Usage in ChatGPT",
+                    "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             },
             {
               "kind": "ai_credits",
@@ -354,7 +894,29 @@
               "unit": "credits",
               "precision": "browser_sync_actual",
               "source": "browser_sync",
-              "visibleByDefault": false
+              "visibleByDefault": false,
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Using Codex with your ChatGPT plan",
+                    "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About ChatGPT Pro tiers",
+                    "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Using Credits for Flexible Usage in ChatGPT",
+                    "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ],
           "notes": [
@@ -368,7 +930,29 @@
             "amount": 200,
             "currency": "USD",
             "period": "month",
-            "precision": "official_exact"
+            "precision": "official_exact",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Using Codex with your ChatGPT plan",
+                  "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "About ChatGPT Pro tiers",
+                  "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Using Credits for Flexible Usage in ChatGPT",
+                  "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
@@ -378,19 +962,62 @@
               "limit": 20,
               "precision": "official_exact",
               "source": "official_preset",
-              "visibleByDefault": true
+              "visibleByDefault": true,
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Using Codex with your ChatGPT plan",
+                    "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About ChatGPT Pro tiers",
+                    "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Using Credits for Flexible Usage in ChatGPT",
+                    "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             },
             {
               "kind": "codex_5h_multiplier",
               "label": "Codex 5-hour allowance vs Plus",
               "unit": "usage_multiplier",
-              "limit": 25,
-              "precision": "official_exact",
+              "precision": "official_qualitative",
               "source": "official_preset",
               "visibleByDefault": true,
               "notes": [
-                "OpenAI describes this as a limited-time higher 5-hour Codex allowance."
-              ]
+                "Previously advertised promotional multipliers are not confirmed by the current source. Use live account quota."
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Using Codex with your ChatGPT plan",
+                    "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About ChatGPT Pro tiers",
+                    "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Using Credits for Flexible Usage in ChatGPT",
+                    "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             },
             {
               "kind": "code_review",
@@ -398,7 +1025,29 @@
               "unit": "reviews",
               "precision": "browser_sync_actual",
               "source": "browser_sync",
-              "visibleByDefault": false
+              "visibleByDefault": false,
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Using Codex with your ChatGPT plan",
+                    "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About ChatGPT Pro tiers",
+                    "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Using Credits for Flexible Usage in ChatGPT",
+                    "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             },
             {
               "kind": "ai_credits",
@@ -406,7 +1055,29 @@
               "unit": "credits",
               "precision": "browser_sync_actual",
               "source": "browser_sync",
-              "visibleByDefault": false
+              "visibleByDefault": false,
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Using Codex with your ChatGPT plan",
+                    "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About ChatGPT Pro tiers",
+                    "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Using Credits for Flexible Usage in ChatGPT",
+                    "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ],
           "notes": [
@@ -420,7 +1091,29 @@
             "amount": 100,
             "currency": "USD",
             "period": "month",
-            "precision": "official_exact"
+            "precision": "official_exact",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Using Codex with your ChatGPT plan",
+                  "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "About ChatGPT Pro tiers",
+                  "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Using Credits for Flexible Usage in ChatGPT",
+                  "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
@@ -430,19 +1123,62 @@
               "limit": 5,
               "precision": "official_exact",
               "source": "official_preset",
-              "visibleByDefault": true
+              "visibleByDefault": true,
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Using Codex with your ChatGPT plan",
+                    "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About ChatGPT Pro tiers",
+                    "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Using Credits for Flexible Usage in ChatGPT",
+                    "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             },
             {
               "kind": "codex_usage_multiplier",
               "label": "Codex usage vs Plus",
               "unit": "usage_multiplier",
-              "limit": 10,
-              "precision": "official_exact",
+              "precision": "official_qualitative",
               "source": "official_preset",
               "visibleByDefault": true,
               "notes": [
-                "OpenAI describes this as a limited-time Codex allowance promotion."
-              ]
+                "Previously advertised promotional multipliers are not confirmed by the current source. Use live account quota."
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Using Codex with your ChatGPT plan",
+                    "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About ChatGPT Pro tiers",
+                    "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Using Credits for Flexible Usage in ChatGPT",
+                    "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             },
             {
               "kind": "code_review",
@@ -450,7 +1186,29 @@
               "unit": "reviews",
               "precision": "browser_sync_actual",
               "source": "browser_sync",
-              "visibleByDefault": false
+              "visibleByDefault": false,
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Using Codex with your ChatGPT plan",
+                    "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About ChatGPT Pro tiers",
+                    "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Using Credits for Flexible Usage in ChatGPT",
+                    "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             },
             {
               "kind": "ai_credits",
@@ -458,7 +1216,29 @@
               "unit": "credits",
               "precision": "browser_sync_actual",
               "source": "browser_sync",
-              "visibleByDefault": false
+              "visibleByDefault": false,
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Using Codex with your ChatGPT plan",
+                    "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About ChatGPT Pro tiers",
+                    "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Using Credits for Flexible Usage in ChatGPT",
+                    "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ],
           "notes": [
@@ -470,7 +1250,29 @@
           "label": "Business Codex",
           "price": {
             "status": "usage_based",
-            "precision": "official_qualitative"
+            "precision": "official_qualitative",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Using Codex with your ChatGPT plan",
+                  "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "About ChatGPT Pro tiers",
+                  "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Using Credits for Flexible Usage in ChatGPT",
+                  "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
@@ -479,7 +1281,29 @@
               "unit": "usd",
               "precision": "official_qualitative",
               "source": "official_preset",
-              "visibleByDefault": true
+              "visibleByDefault": true,
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Using Codex with your ChatGPT plan",
+                    "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About ChatGPT Pro tiers",
+                    "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Using Credits for Flexible Usage in ChatGPT",
+                    "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ]
         },
@@ -488,7 +1312,29 @@
           "label": "Business ChatGPT & Codex",
           "price": {
             "status": "plan_pricing",
-            "precision": "official_qualitative"
+            "precision": "official_qualitative",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Using Codex with your ChatGPT plan",
+                  "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "About ChatGPT Pro tiers",
+                  "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Using Credits for Flexible Usage in ChatGPT",
+                  "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
@@ -497,7 +1343,29 @@
               "unit": "tasks",
               "precision": "official_qualitative",
               "source": "official_preset",
-              "visibleByDefault": true
+              "visibleByDefault": true,
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Using Codex with your ChatGPT plan",
+                    "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About ChatGPT Pro tiers",
+                    "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Using Credits for Flexible Usage in ChatGPT",
+                    "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ]
         },
@@ -506,7 +1374,29 @@
           "label": "Enterprise/Edu",
           "price": {
             "status": "custom",
-            "precision": "official_qualitative"
+            "precision": "official_qualitative",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Using Codex with your ChatGPT plan",
+                  "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "About ChatGPT Pro tiers",
+                  "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Using Credits for Flexible Usage in ChatGPT",
+                  "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
@@ -515,7 +1405,29 @@
               "unit": "tasks",
               "precision": "official_qualitative",
               "source": "official_preset",
-              "visibleByDefault": true
+              "visibleByDefault": true,
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Using Codex with your ChatGPT plan",
+                    "url": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About ChatGPT Pro tiers",
+                    "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Using Credits for Flexible Usage in ChatGPT",
+                    "url": "https://help.openai.com/en/articles/12642688-using-credits-for-flexible-usage-in-chatgpt-freegopluspro",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ]
         }
@@ -533,17 +1445,17 @@
         {
           "label": "Plans for GitHub Copilot",
           "url": "https://docs.github.com/en/copilot/get-started/plans",
-          "reviewedAt": "2026-06-30"
+          "reviewedAt": "2026-09-05"
         },
         {
           "label": "Requests in GitHub Copilot",
           "url": "https://docs.github.com/en/copilot/concepts/billing/copilot-requests",
-          "reviewedAt": "2026-06-30"
+          "reviewedAt": "2026-09-05"
         },
         {
           "label": "About billing for individual GitHub Copilot plans",
           "url": "https://docs.github.com/en/copilot/concepts/billing/billing-for-individuals",
-          "reviewedAt": "2026-06-30"
+          "reviewedAt": "2026-09-05"
         }
       ],
       "plans": [
@@ -554,22 +1466,66 @@
             "amount": 0,
             "currency": "USD",
             "period": "month",
-            "precision": "official_exact"
+            "precision": "official_exact",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Plans for GitHub Copilot",
+                  "url": "https://docs.github.com/en/copilot/get-started/plans",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Requests in GitHub Copilot",
+                  "url": "https://docs.github.com/en/copilot/concepts/billing/copilot-requests",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "About billing for individual GitHub Copilot plans",
+                  "url": "https://docs.github.com/en/copilot/concepts/billing/billing-for-individuals",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
-              "kind": "premium_requests",
-              "label": "Monthly premium requests",
-              "unit": "requests",
-              "limit": 50,
+              "kind": "ai_credits",
+              "label": "GitHub AI Credits",
+              "unit": "credits",
               "reset": {
-                "type": "monthly_utc",
-                "day": 1,
-                "time": "00:00:00"
+                "type": "vendor_provided_reset_at"
               },
-              "precision": "official_exact",
+              "precision": "official_qualitative",
               "source": "official_preset",
-              "visibleByDefault": true
+              "visibleByDefault": true,
+              "notes": [
+                "Current plans use AI credits. Account allowances, flex credits, and organization budgets must come from authenticated usage data; old premium-request counts are not current credit caps."
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Plans for GitHub Copilot",
+                    "url": "https://docs.github.com/en/copilot/get-started/plans",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Requests in GitHub Copilot",
+                    "url": "https://docs.github.com/en/copilot/concepts/billing/copilot-requests",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About billing for individual GitHub Copilot plans",
+                    "url": "https://docs.github.com/en/copilot/concepts/billing/billing-for-individuals",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ]
         },
@@ -580,22 +1536,66 @@
             "amount": 10,
             "currency": "USD",
             "period": "month",
-            "precision": "official_exact"
+            "precision": "official_exact",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Plans for GitHub Copilot",
+                  "url": "https://docs.github.com/en/copilot/get-started/plans",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Requests in GitHub Copilot",
+                  "url": "https://docs.github.com/en/copilot/concepts/billing/copilot-requests",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "About billing for individual GitHub Copilot plans",
+                  "url": "https://docs.github.com/en/copilot/concepts/billing/billing-for-individuals",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
-              "kind": "premium_requests",
-              "label": "Monthly premium requests",
-              "unit": "requests",
-              "limit": 300,
+              "kind": "ai_credits",
+              "label": "GitHub AI Credits",
+              "unit": "credits",
               "reset": {
-                "type": "monthly_utc",
-                "day": 1,
-                "time": "00:00:00"
+                "type": "vendor_provided_reset_at"
               },
-              "precision": "official_exact",
+              "precision": "official_qualitative",
               "source": "official_preset",
-              "visibleByDefault": true
+              "visibleByDefault": true,
+              "notes": [
+                "Current plans use AI credits. Account allowances, flex credits, and organization budgets must come from authenticated usage data; old premium-request counts are not current credit caps."
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Plans for GitHub Copilot",
+                    "url": "https://docs.github.com/en/copilot/get-started/plans",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Requests in GitHub Copilot",
+                    "url": "https://docs.github.com/en/copilot/concepts/billing/copilot-requests",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About billing for individual GitHub Copilot plans",
+                    "url": "https://docs.github.com/en/copilot/concepts/billing/billing-for-individuals",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ]
         },
@@ -606,22 +1606,66 @@
             "amount": 39,
             "currency": "USD",
             "period": "month",
-            "precision": "official_exact"
+            "precision": "official_exact",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Plans for GitHub Copilot",
+                  "url": "https://docs.github.com/en/copilot/get-started/plans",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Requests in GitHub Copilot",
+                  "url": "https://docs.github.com/en/copilot/concepts/billing/copilot-requests",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "About billing for individual GitHub Copilot plans",
+                  "url": "https://docs.github.com/en/copilot/concepts/billing/billing-for-individuals",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
-              "kind": "premium_requests",
-              "label": "Monthly premium requests",
-              "unit": "requests",
-              "limit": 1500,
+              "kind": "ai_credits",
+              "label": "GitHub AI Credits",
+              "unit": "credits",
               "reset": {
-                "type": "monthly_utc",
-                "day": 1,
-                "time": "00:00:00"
+                "type": "vendor_provided_reset_at"
               },
-              "precision": "official_exact",
+              "precision": "official_qualitative",
               "source": "official_preset",
-              "visibleByDefault": true
+              "visibleByDefault": true,
+              "notes": [
+                "Current plans use AI credits. Account allowances, flex credits, and organization budgets must come from authenticated usage data; old premium-request counts are not current credit caps."
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Plans for GitHub Copilot",
+                    "url": "https://docs.github.com/en/copilot/get-started/plans",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Requests in GitHub Copilot",
+                    "url": "https://docs.github.com/en/copilot/concepts/billing/copilot-requests",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About billing for individual GitHub Copilot plans",
+                    "url": "https://docs.github.com/en/copilot/concepts/billing/billing-for-individuals",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ]
         },
@@ -632,22 +1676,66 @@
             "amount": 19,
             "currency": "USD",
             "period": "user_month",
-            "precision": "official_exact"
+            "precision": "official_exact",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Plans for GitHub Copilot",
+                  "url": "https://docs.github.com/en/copilot/get-started/plans",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Requests in GitHub Copilot",
+                  "url": "https://docs.github.com/en/copilot/concepts/billing/copilot-requests",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "About billing for individual GitHub Copilot plans",
+                  "url": "https://docs.github.com/en/copilot/concepts/billing/billing-for-individuals",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
-              "kind": "premium_requests",
-              "label": "Monthly premium requests",
-              "unit": "requests",
-              "limit": 300,
+              "kind": "ai_credits",
+              "label": "GitHub AI Credits",
+              "unit": "credits",
               "reset": {
-                "type": "monthly_utc",
-                "day": 1,
-                "time": "00:00:00"
+                "type": "vendor_provided_reset_at"
               },
-              "precision": "official_exact",
+              "precision": "official_qualitative",
               "source": "official_preset",
-              "visibleByDefault": true
+              "visibleByDefault": true,
+              "notes": [
+                "Current plans use AI credits. Account allowances, flex credits, and organization budgets must come from authenticated usage data; old premium-request counts are not current credit caps."
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Plans for GitHub Copilot",
+                    "url": "https://docs.github.com/en/copilot/get-started/plans",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Requests in GitHub Copilot",
+                    "url": "https://docs.github.com/en/copilot/concepts/billing/copilot-requests",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About billing for individual GitHub Copilot plans",
+                    "url": "https://docs.github.com/en/copilot/concepts/billing/billing-for-individuals",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ]
         },
@@ -658,22 +1746,66 @@
             "amount": 39,
             "currency": "USD",
             "period": "user_month",
-            "precision": "official_exact"
+            "precision": "official_exact",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Plans for GitHub Copilot",
+                  "url": "https://docs.github.com/en/copilot/get-started/plans",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Requests in GitHub Copilot",
+                  "url": "https://docs.github.com/en/copilot/concepts/billing/copilot-requests",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "About billing for individual GitHub Copilot plans",
+                  "url": "https://docs.github.com/en/copilot/concepts/billing/billing-for-individuals",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
-              "kind": "premium_requests",
-              "label": "Monthly premium requests",
-              "unit": "requests",
-              "limit": 1000,
+              "kind": "ai_credits",
+              "label": "GitHub AI Credits",
+              "unit": "credits",
               "reset": {
-                "type": "monthly_utc",
-                "day": 1,
-                "time": "00:00:00"
+                "type": "vendor_provided_reset_at"
               },
-              "precision": "official_exact",
+              "precision": "official_qualitative",
               "source": "official_preset",
-              "visibleByDefault": true
+              "visibleByDefault": true,
+              "notes": [
+                "Current plans use AI credits. Account allowances, flex credits, and organization budgets must come from authenticated usage data; old premium-request counts are not current credit caps."
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Plans for GitHub Copilot",
+                    "url": "https://docs.github.com/en/copilot/get-started/plans",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Requests in GitHub Copilot",
+                    "url": "https://docs.github.com/en/copilot/concepts/billing/copilot-requests",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About billing for individual GitHub Copilot plans",
+                    "url": "https://docs.github.com/en/copilot/concepts/billing/billing-for-individuals",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ]
         }
@@ -697,7 +1829,31 @@
               "visibleByDefault": false,
               "notes": [
                 "Premium request allowances vary by plan. Use a custom limit or synced organization data for numeric caps."
-              ]
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Plans for GitHub Copilot",
+                    "url": "https://docs.github.com/en/copilot/get-started/plans",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Requests in GitHub Copilot",
+                    "url": "https://docs.github.com/en/copilot/concepts/billing/copilot-requests",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About billing for individual GitHub Copilot plans",
+                    "url": "https://docs.github.com/en/copilot/concepts/billing/billing-for-individuals",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ],
+                "archived": true,
+                "needsManualReview": true
+              }
             },
             {
               "kind": "code_review",
@@ -708,7 +1864,31 @@
               "visibleByDefault": true,
               "notes": [
                 "Code Review is listed among premium-request features before usage-based billing."
-              ]
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Plans for GitHub Copilot",
+                    "url": "https://docs.github.com/en/copilot/get-started/plans",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Requests in GitHub Copilot",
+                    "url": "https://docs.github.com/en/copilot/concepts/billing/copilot-requests",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About billing for individual GitHub Copilot plans",
+                    "url": "https://docs.github.com/en/copilot/concepts/billing/billing-for-individuals",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ],
+                "archived": true,
+                "needsManualReview": true
+              }
             }
           ]
         },
@@ -726,7 +1906,29 @@
               "visibleByDefault": true,
               "notes": [
                 "Token usage is converted to GitHub AI Credits."
-              ]
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-06-01",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Plans for GitHub Copilot",
+                    "url": "https://docs.github.com/en/copilot/get-started/plans",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Requests in GitHub Copilot",
+                    "url": "https://docs.github.com/en/copilot/concepts/billing/copilot-requests",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About billing for individual GitHub Copilot plans",
+                    "url": "https://docs.github.com/en/copilot/concepts/billing/billing-for-individuals",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             },
             {
               "kind": "code_review",
@@ -737,7 +1939,29 @@
               "visibleByDefault": true,
               "notes": [
                 "Code review consumes AI credits and GitHub Actions minutes."
-              ]
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-06-01",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Plans for GitHub Copilot",
+                    "url": "https://docs.github.com/en/copilot/get-started/plans",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Requests in GitHub Copilot",
+                    "url": "https://docs.github.com/en/copilot/concepts/billing/copilot-requests",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "About billing for individual GitHub Copilot plans",
+                    "url": "https://docs.github.com/en/copilot/concepts/billing/billing-for-individuals",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ]
         }
@@ -755,7 +1979,12 @@
         {
           "label": "Cursor pricing",
           "url": "https://cursor.com/pricing",
-          "reviewedAt": "2026-06-30"
+          "reviewedAt": "2026-09-05"
+        },
+        {
+          "label": "Cursor models and pricing",
+          "url": "https://cursor.com/docs/models-and-pricing",
+          "reviewedAt": "2026-09-05"
         }
       ],
       "plans": [
@@ -766,7 +1995,24 @@
             "amount": 0,
             "currency": "USD",
             "period": "month",
-            "precision": "official_exact"
+            "precision": "official_exact",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Cursor pricing",
+                  "url": "https://cursor.com/pricing",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Cursor models and pricing",
+                  "url": "https://cursor.com/docs/models-and-pricing",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
@@ -775,7 +2021,24 @@
               "unit": "usage",
               "precision": "official_qualitative",
               "source": "official_preset",
-              "visibleByDefault": true
+              "visibleByDefault": true,
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Cursor pricing",
+                    "url": "https://cursor.com/pricing",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Cursor models and pricing",
+                    "url": "https://cursor.com/docs/models-and-pricing",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ]
         },
@@ -786,7 +2049,24 @@
             "amount": 20,
             "currency": "USD",
             "period": "month",
-            "precision": "official_exact"
+            "precision": "official_exact",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Cursor pricing",
+                  "url": "https://cursor.com/pricing",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Cursor models and pricing",
+                  "url": "https://cursor.com/docs/models-and-pricing",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
@@ -798,7 +2078,24 @@
               "visibleByDefault": true,
               "notes": [
                 "Vendor does not publish an exact request count on the reviewed pricing page."
-              ]
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Cursor pricing",
+                    "url": "https://cursor.com/pricing",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Cursor models and pricing",
+                    "url": "https://cursor.com/docs/models-and-pricing",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ]
         },
@@ -809,17 +2106,51 @@
             "amount": 60,
             "currency": "USD",
             "period": "month",
-            "precision": "official_exact"
+            "precision": "official_exact",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Cursor pricing",
+                  "url": "https://cursor.com/pricing",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Cursor models and pricing",
+                  "url": "https://cursor.com/docs/models-and-pricing",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
               "kind": "custom",
-              "label": "3x usage on OpenAI, Claude, Gemini models",
+              "label": "Agent usage relative to Pro",
               "unit": "usage_multiplier",
               "limit": 3,
               "precision": "official_exact",
               "source": "official_preset",
-              "visibleByDefault": true
+              "visibleByDefault": true,
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Cursor pricing",
+                    "url": "https://cursor.com/pricing",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Cursor models and pricing",
+                    "url": "https://cursor.com/docs/models-and-pricing",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ]
         },
@@ -830,17 +2161,51 @@
             "amount": 200,
             "currency": "USD",
             "period": "month",
-            "precision": "official_exact"
+            "precision": "official_exact",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Cursor pricing",
+                  "url": "https://cursor.com/pricing",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Cursor models and pricing",
+                  "url": "https://cursor.com/docs/models-and-pricing",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
               "kind": "custom",
-              "label": "20x usage on OpenAI, Claude, Gemini models",
+              "label": "Agent usage relative to Pro",
               "unit": "usage_multiplier",
               "limit": 20,
               "precision": "official_exact",
               "source": "official_preset",
-              "visibleByDefault": true
+              "visibleByDefault": true,
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Cursor pricing",
+                    "url": "https://cursor.com/pricing",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Cursor models and pricing",
+                    "url": "https://cursor.com/docs/models-and-pricing",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ]
         },
@@ -851,7 +2216,24 @@
             "amount": 40,
             "currency": "USD",
             "period": "user_month",
-            "precision": "official_exact"
+            "precision": "official_exact",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Cursor pricing",
+                  "url": "https://cursor.com/pricing",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Cursor models and pricing",
+                  "url": "https://cursor.com/docs/models-and-pricing",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
@@ -860,7 +2242,24 @@
               "unit": "usage",
               "precision": "official_qualitative",
               "source": "official_preset",
-              "visibleByDefault": true
+              "visibleByDefault": true,
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Cursor pricing",
+                    "url": "https://cursor.com/pricing",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Cursor models and pricing",
+                    "url": "https://cursor.com/docs/models-and-pricing",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ]
         },
@@ -869,7 +2268,24 @@
           "label": "Enterprise",
           "price": {
             "status": "custom",
-            "precision": "official_qualitative"
+            "precision": "official_qualitative",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Cursor pricing",
+                  "url": "https://cursor.com/pricing",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Cursor models and pricing",
+                  "url": "https://cursor.com/docs/models-and-pricing",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
@@ -878,7 +2294,24 @@
               "unit": "usage",
               "precision": "official_qualitative",
               "source": "official_preset",
-              "visibleByDefault": true
+              "visibleByDefault": true,
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Cursor pricing",
+                    "url": "https://cursor.com/pricing",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Cursor models and pricing",
+                    "url": "https://cursor.com/docs/models-and-pricing",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ]
         }
@@ -896,22 +2329,22 @@
         {
           "label": "Windsurf pricing",
           "url": "https://windsurf.com/pricing",
-          "reviewedAt": "2026-06-30"
+          "reviewedAt": "2026-09-05"
         },
         {
           "label": "Windsurf usage docs",
           "url": "https://docs.windsurf.com/windsurf/accounts/usage",
-          "reviewedAt": "2026-06-30"
+          "reviewedAt": "2026-09-05"
         },
         {
           "label": "Windsurf quota docs",
           "url": "https://docs.windsurf.com/windsurf/accounts/quota",
-          "reviewedAt": "2026-06-30"
+          "reviewedAt": "2026-09-05"
         },
         {
           "label": "Devin plans after Windsurf acquisition",
           "url": "https://devin.ai/pricing",
-          "reviewedAt": "2026-06-30"
+          "reviewedAt": "2026-09-05"
         }
       ],
       "plans": [
@@ -922,7 +2355,35 @@
             "amount": 0,
             "currency": "USD",
             "period": "month",
-            "precision": "official_exact"
+            "precision": "official_exact",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Windsurf pricing",
+                  "url": "https://windsurf.com/pricing",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Windsurf usage docs",
+                  "url": "https://docs.windsurf.com/windsurf/accounts/usage",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Windsurf quota docs",
+                  "url": "https://docs.windsurf.com/windsurf/accounts/quota",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Devin plans after Windsurf acquisition",
+                  "url": "https://devin.ai/pricing",
+                  "reviewedAt": "2026-09-05"
+                }
+              ],
+              "needsManualReview": true
+            }
           },
           "quotaWindows": [
             {
@@ -933,9 +2394,36 @@
               "source": "official_preset",
               "visibleByDefault": true,
               "notes": [
-                "Pricing page says usage allowance refreshes daily and weekly; docs also describe quota-based usage.",
-                "Re-reviewed on 2026-06-30 after Windsurf/Devin/Cognition branding changes; keep exact limits manual until vendor docs converge."
-              ]
+                "Reviewed official Devin pricing and redirected Windsurf account documentation on 2026-09-05; exact account quotas remain manual review."
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Windsurf pricing",
+                    "url": "https://windsurf.com/pricing",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Windsurf usage docs",
+                    "url": "https://docs.windsurf.com/windsurf/accounts/usage",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Windsurf quota docs",
+                    "url": "https://docs.windsurf.com/windsurf/accounts/quota",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Devin plans after Windsurf acquisition",
+                    "url": "https://devin.ai/pricing",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ],
+                "needsManualReview": true
+              }
             }
           ]
         },
@@ -946,7 +2434,35 @@
             "amount": 20,
             "currency": "USD",
             "period": "month",
-            "precision": "official_exact"
+            "precision": "official_exact",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Windsurf pricing",
+                  "url": "https://windsurf.com/pricing",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Windsurf usage docs",
+                  "url": "https://docs.windsurf.com/windsurf/accounts/usage",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Windsurf quota docs",
+                  "url": "https://docs.windsurf.com/windsurf/accounts/quota",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Devin plans after Windsurf acquisition",
+                  "url": "https://devin.ai/pricing",
+                  "reviewedAt": "2026-09-05"
+                }
+              ],
+              "needsManualReview": true
+            }
           },
           "quotaWindows": [
             {
@@ -957,9 +2473,36 @@
               "source": "official_preset",
               "visibleByDefault": true,
               "notes": [
-                "Source conflict: pricing page and quota docs require a manual review before exact limits are shown.",
-                "Re-reviewed on 2026-06-30 after Windsurf/Devin/Cognition branding changes; keep exact limits manual until vendor docs converge."
-              ]
+                "Reviewed official Devin pricing and redirected Windsurf account documentation on 2026-09-05; exact account quotas remain manual review."
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Windsurf pricing",
+                    "url": "https://windsurf.com/pricing",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Windsurf usage docs",
+                    "url": "https://docs.windsurf.com/windsurf/accounts/usage",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Windsurf quota docs",
+                    "url": "https://docs.windsurf.com/windsurf/accounts/quota",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Devin plans after Windsurf acquisition",
+                    "url": "https://devin.ai/pricing",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ],
+                "needsManualReview": true
+              }
             },
             {
               "kind": "extra_spend",
@@ -969,8 +2512,36 @@
               "source": "official_preset",
               "visibleByDefault": true,
               "notes": [
-                "Re-reviewed on 2026-06-30 after Windsurf/Devin/Cognition branding changes; keep exact limits manual until vendor docs converge."
-              ]
+                "Reviewed official Devin pricing and redirected Windsurf account documentation on 2026-09-05; exact account quotas remain manual review."
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Windsurf pricing",
+                    "url": "https://windsurf.com/pricing",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Windsurf usage docs",
+                    "url": "https://docs.windsurf.com/windsurf/accounts/usage",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Windsurf quota docs",
+                    "url": "https://docs.windsurf.com/windsurf/accounts/quota",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Devin plans after Windsurf acquisition",
+                    "url": "https://devin.ai/pricing",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ],
+                "needsManualReview": true
+              }
             }
           ]
         },
@@ -981,7 +2552,35 @@
             "amount": 200,
             "currency": "USD",
             "period": "month",
-            "precision": "official_exact"
+            "precision": "official_exact",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Windsurf pricing",
+                  "url": "https://windsurf.com/pricing",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Windsurf usage docs",
+                  "url": "https://docs.windsurf.com/windsurf/accounts/usage",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Windsurf quota docs",
+                  "url": "https://docs.windsurf.com/windsurf/accounts/quota",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Devin plans after Windsurf acquisition",
+                  "url": "https://devin.ai/pricing",
+                  "reviewedAt": "2026-09-05"
+                }
+              ],
+              "needsManualReview": true
+            }
           },
           "quotaWindows": [
             {
@@ -992,8 +2591,36 @@
               "source": "official_preset",
               "visibleByDefault": true,
               "notes": [
-                "Re-reviewed on 2026-06-30 after Windsurf/Devin/Cognition branding changes; keep exact limits manual until vendor docs converge."
-              ]
+                "Reviewed official Devin pricing and redirected Windsurf account documentation on 2026-09-05; exact account quotas remain manual review."
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Windsurf pricing",
+                    "url": "https://windsurf.com/pricing",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Windsurf usage docs",
+                    "url": "https://docs.windsurf.com/windsurf/accounts/usage",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Windsurf quota docs",
+                    "url": "https://docs.windsurf.com/windsurf/accounts/quota",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Devin plans after Windsurf acquisition",
+                    "url": "https://devin.ai/pricing",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ],
+                "needsManualReview": true
+              }
             },
             {
               "kind": "extra_spend",
@@ -1003,8 +2630,36 @@
               "source": "official_preset",
               "visibleByDefault": true,
               "notes": [
-                "Re-reviewed on 2026-06-30 after Windsurf/Devin/Cognition branding changes; keep exact limits manual until vendor docs converge."
-              ]
+                "Reviewed official Devin pricing and redirected Windsurf account documentation on 2026-09-05; exact account quotas remain manual review."
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Windsurf pricing",
+                    "url": "https://windsurf.com/pricing",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Windsurf usage docs",
+                    "url": "https://docs.windsurf.com/windsurf/accounts/usage",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Windsurf quota docs",
+                    "url": "https://docs.windsurf.com/windsurf/accounts/quota",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Devin plans after Windsurf acquisition",
+                    "url": "https://devin.ai/pricing",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ],
+                "needsManualReview": true
+              }
             }
           ]
         },
@@ -1012,10 +2667,36 @@
           "id": "teams",
           "label": "Teams",
           "price": {
-            "amount": 40,
-            "currency": "USD",
-            "period": "user_month",
-            "precision": "official_exact"
+            "status": "account_specific",
+            "precision": "needs_manual_review",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Windsurf pricing",
+                  "url": "https://windsurf.com/pricing",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Windsurf usage docs",
+                  "url": "https://docs.windsurf.com/windsurf/accounts/usage",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Windsurf quota docs",
+                  "url": "https://docs.windsurf.com/windsurf/accounts/quota",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Devin plans after Windsurf acquisition",
+                  "url": "https://devin.ai/pricing",
+                  "reviewedAt": "2026-09-05"
+                }
+              ],
+              "needsManualReview": true
+            }
           },
           "quotaWindows": [
             {
@@ -1026,8 +2707,36 @@
               "source": "official_preset",
               "visibleByDefault": true,
               "notes": [
-                "Re-reviewed on 2026-06-30 after Windsurf/Devin/Cognition branding changes; keep exact limits manual until vendor docs converge."
-              ]
+                "Reviewed official Devin pricing and redirected Windsurf account documentation on 2026-09-05; exact account quotas remain manual review."
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Windsurf pricing",
+                    "url": "https://windsurf.com/pricing",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Windsurf usage docs",
+                    "url": "https://docs.windsurf.com/windsurf/accounts/usage",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Windsurf quota docs",
+                    "url": "https://docs.windsurf.com/windsurf/accounts/quota",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Devin plans after Windsurf acquisition",
+                    "url": "https://devin.ai/pricing",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ],
+                "needsManualReview": true
+              }
             },
             {
               "kind": "extra_spend",
@@ -1037,8 +2746,36 @@
               "source": "official_preset",
               "visibleByDefault": true,
               "notes": [
-                "Re-reviewed on 2026-06-30 after Windsurf/Devin/Cognition branding changes; keep exact limits manual until vendor docs converge."
-              ]
+                "Reviewed official Devin pricing and redirected Windsurf account documentation on 2026-09-05; exact account quotas remain manual review."
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Windsurf pricing",
+                    "url": "https://windsurf.com/pricing",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Windsurf usage docs",
+                    "url": "https://docs.windsurf.com/windsurf/accounts/usage",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Windsurf quota docs",
+                    "url": "https://docs.windsurf.com/windsurf/accounts/quota",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Devin plans after Windsurf acquisition",
+                    "url": "https://devin.ai/pricing",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ],
+                "needsManualReview": true
+              }
             }
           ]
         },
@@ -1047,7 +2784,35 @@
           "label": "Enterprise",
           "price": {
             "status": "custom",
-            "precision": "official_qualitative"
+            "precision": "official_qualitative",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "Windsurf pricing",
+                  "url": "https://windsurf.com/pricing",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Windsurf usage docs",
+                  "url": "https://docs.windsurf.com/windsurf/accounts/usage",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Windsurf quota docs",
+                  "url": "https://docs.windsurf.com/windsurf/accounts/quota",
+                  "reviewedAt": "2026-09-05"
+                },
+                {
+                  "label": "Devin plans after Windsurf acquisition",
+                  "url": "https://devin.ai/pricing",
+                  "reviewedAt": "2026-09-05"
+                }
+              ],
+              "needsManualReview": true
+            }
           },
           "quotaWindows": [
             {
@@ -1058,14 +2823,42 @@
               "source": "official_preset",
               "visibleByDefault": true,
               "notes": [
-                "Re-reviewed on 2026-06-30 after Windsurf/Devin/Cognition branding changes; keep exact limits manual until vendor docs converge."
-              ]
+                "Reviewed official Devin pricing and redirected Windsurf account documentation on 2026-09-05; exact account quotas remain manual review."
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "Windsurf pricing",
+                    "url": "https://windsurf.com/pricing",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Windsurf usage docs",
+                    "url": "https://docs.windsurf.com/windsurf/accounts/usage",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Windsurf quota docs",
+                    "url": "https://docs.windsurf.com/windsurf/accounts/quota",
+                    "reviewedAt": "2026-09-05"
+                  },
+                  {
+                    "label": "Devin plans after Windsurf acquisition",
+                    "url": "https://devin.ai/pricing",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ],
+                "needsManualReview": true
+              }
             }
           ]
         }
       ],
-      "reviewReason": "Reviewed Windsurf/Cognition/Devin pricing and quota docs on 2026-06-30; exact local limits remain manual-review because public pages preserve Windsurf pricing while routing some plan/account surfaces through Devin/Cognition branding.",
-      "sourceConflictReason": "Windsurf pricing still advertises usage allowances, while Windsurf quota docs and Devin/Cognition-branded account pages describe daily/weekly or plan-specific budgets after the acquisition/rebrand."
+      "reviewReason": "Reviewed on 2026-09-05. Windsurf sources redirect to Devin. Account-specific quotas and existing subscription terms require authenticated account verification.",
+      "sourceConflictReason": "Windsurf account documentation preserves existing subscription terms, while Devin pricing lists a team base fee plus per-seat charges. Do not treat a per-seat price as the complete team subscription."
     },
     {
       "key": "jetbrains-ai",
@@ -1079,7 +2872,7 @@
         {
           "label": "JetBrains AI plans and usage",
           "url": "https://www.jetbrains.com/help/ai-assistant/licensing-and-subscriptions.html",
-          "reviewedAt": "2026-06-30"
+          "reviewedAt": "2026-09-05"
         }
       ],
       "plans": [
@@ -1090,7 +2883,19 @@
             "amount": 0,
             "currency": "USD",
             "period": "30d",
-            "precision": "official_exact"
+            "precision": "official_exact",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "JetBrains AI plans and usage",
+                  "url": "https://www.jetbrains.com/help/ai-assistant/licensing-and-subscriptions.html",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
@@ -1103,7 +2908,19 @@
               },
               "precision": "official_exact",
               "source": "official_preset",
-              "visibleByDefault": true
+              "visibleByDefault": true,
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "JetBrains AI plans and usage",
+                    "url": "https://www.jetbrains.com/help/ai-assistant/licensing-and-subscriptions.html",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ]
         },
@@ -1115,7 +2932,19 @@
             "rangeMax": 20,
             "currency": "USD",
             "period": "30d",
-            "precision": "official_range"
+            "precision": "official_range",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "JetBrains AI plans and usage",
+                  "url": "https://www.jetbrains.com/help/ai-assistant/licensing-and-subscriptions.html",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
@@ -1132,7 +2961,19 @@
               "visibleByDefault": true,
               "notes": [
                 "JetBrains source shows two tables with different AI Pro prices/credits."
-              ]
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "JetBrains AI plans and usage",
+                    "url": "https://www.jetbrains.com/help/ai-assistant/licensing-and-subscriptions.html",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ]
         },
@@ -1144,7 +2985,19 @@
             "rangeMax": 60,
             "currency": "USD",
             "period": "30d",
-            "precision": "official_range"
+            "precision": "official_range",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "JetBrains AI plans and usage",
+                  "url": "https://www.jetbrains.com/help/ai-assistant/licensing-and-subscriptions.html",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
@@ -1161,7 +3014,19 @@
               "visibleByDefault": true,
               "notes": [
                 "JetBrains source shows two tables with different AI Ultimate prices/credits."
-              ]
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "JetBrains AI plans and usage",
+                    "url": "https://www.jetbrains.com/help/ai-assistant/licensing-and-subscriptions.html",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ]
         },
@@ -1170,7 +3035,19 @@
           "label": "AI Enterprise",
           "price": {
             "status": "enterprise_pricing",
-            "precision": "official_qualitative"
+            "precision": "official_qualitative",
+            "evidence": {
+              "reviewedAt": "2026-09-05",
+              "effectiveFrom": "2026-09-05",
+              "expiresAt": "2026-10-05",
+              "sourceRefs": [
+                {
+                  "label": "JetBrains AI plans and usage",
+                  "url": "https://www.jetbrains.com/help/ai-assistant/licensing-and-subscriptions.html",
+                  "reviewedAt": "2026-09-05"
+                }
+              ]
+            }
           },
           "quotaWindows": [
             {
@@ -1182,12 +3059,24 @@
               "visibleByDefault": true,
               "notes": [
                 "Quota is described as on par with AI Ultimate or higher, not a single exact value."
-              ]
+              ],
+              "evidence": {
+                "reviewedAt": "2026-09-05",
+                "effectiveFrom": "2026-09-05",
+                "expiresAt": "2026-10-05",
+                "sourceRefs": [
+                  {
+                    "label": "JetBrains AI plans and usage",
+                    "url": "https://www.jetbrains.com/help/ai-assistant/licensing-and-subscriptions.html",
+                    "reviewedAt": "2026-09-05"
+                  }
+                ]
+              }
             }
           ]
         }
       ],
-      "reviewReason": "Reviewed JetBrains AI plans and usage docs on 2026-06-30; personal and commercial tables are represented as official ranges instead of a source conflict."
+      "reviewReason": "Reviewed on 2026-09-05. Personal and commercial tables retain distinct price and credit ranges; organization pooling requires account-specific data."
     }
   ]
 }

@@ -107,7 +107,7 @@ def main() -> None:
     plan = plan_path.read_text(encoding="utf-8")
     target_match = require_match(
         plan,
-        r"^(?:- \*\*Target release:\*\*\s+`([^`]+)`|\|\s*Target\s*\|\s*`?([^`|]+?)`?\s*\|)",
+        r"^(?:- \*\*Target release:\*\*\s+`([^`]+)`|\|\s*(?:Target|Proposed release)\s*\|\s*`?([^`|]+?)`?\s*\|)",
         f"v{stable_major} plan target",
     )
     target = next(group.strip() for group in target_match.groups() if group).removeprefix("v")

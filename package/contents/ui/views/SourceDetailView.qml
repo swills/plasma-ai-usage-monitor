@@ -518,6 +518,33 @@ QQC2.ScrollView {
             visible: detail.quotaData.length > 0
         }
 
+        PlasmaComponents.Label {
+            Layout.fillWidth: true
+            Layout.leftMargin: Kirigami.Units.smallSpacing
+            Layout.rightMargin: Kirigami.Units.smallSpacing
+            visible: text !== ""
+            wrapMode: Text.WordWrap
+            text: {
+                var retained = detail.sourceData.lastKnownQuotaWindows || [];
+                var lines = [];
+                for (var i = 0; i < retained.length; ++i) {
+                    var row = retained[i];
+                    if (row.available !== false || !row.observedAt) continue;
+                    var value = row.percentRemaining;
+                    var unit = i18n("% remaining");
+                    if (value === undefined && typeof row.percentUsed === "number")
+                        value = 100 - row.percentUsed;
+                    if (value === undefined) { value = row.value; unit = row.unit || ""; }
+                    if (typeof value !== "number" || !Number.isFinite(value)) continue;
+                    lines.push(i18n("Last known · %1: %2 %3 · observed %4 · awaiting fresh data",
+                        row.window || row.label || row.kind, value, unit,
+                        new Date(row.observedAt).toLocaleString(Qt.locale())));
+                }
+                return lines.join("\n");
+            }
+            Accessible.name: text
+        }
+
         Repeater {
             model: detail.quotaData
             Rectangle {

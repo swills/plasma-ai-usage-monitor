@@ -114,20 +114,30 @@ void ClaudeCodeMonitor::fetchAccountInfo(const QString &cookieHeader)
         reply->deleteLater();
 
         if (reply->error() != QNetworkReply::NoError) {
-            int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-            qWarning() << "ClaudeCodeMonitor: Bootstrap fetch failed:" << reply->errorString() << "HTTP" << httpStatus;
-            setSyncing(false);
-            if (httpStatus == 401 || httpStatus == 403) {
-                setSyncStatus(i18n("Session expired"));
-                const QString message = i18n("Session expired — please log in to claude.ai in Firefox again");
-                Q_EMIT syncDiagnostic(toolName(), QStringLiteral("session_expired"), message);
-                Q_EMIT syncCompleted(false, message);
-            } else {
-                setSyncStatus(i18n("Sync failed"));
-                const QString message = reply->errorString();
-                Q_EMIT syncDiagnostic(toolName(), QStringLiteral("network_error"), message);
-                Q_EMIT syncCompleted(false, message);
-            }
+          recordSyncHttpFailure(
+              reply->attribute(QNetworkRequest::HttpStatusCodeAttribute)
+                  .toInt(),
+              reply->rawHeader("Retry-After"));
+          int httpStatus =
+              reply->attribute(QNetworkRequest::HttpStatusCodeAttribute)
+                  .toInt();
+          qWarning() << "ClaudeCodeMonitor: Bootstrap fetch failed:"
+                     << reply->errorString() << "HTTP" << httpStatus;
+          setSyncing(false);
+          if (httpStatus == 401 || httpStatus == 403) {
+            setSyncStatus(i18n("Session expired"));
+            const QString message = i18n("Session expired — please log in to "
+                                         "claude.ai in Firefox again");
+            Q_EMIT syncDiagnostic(toolName(), QStringLiteral("session_expired"),
+                                  message);
+            Q_EMIT syncCompleted(false, message);
+          } else {
+            setSyncStatus(i18n("Sync failed"));
+            const QString message = reply->errorString();
+            Q_EMIT syncDiagnostic(toolName(), QStringLiteral("network_error"),
+                                  message);
+            Q_EMIT syncCompleted(false, message);
+          }
             return;
         }
 
@@ -242,20 +252,30 @@ void ClaudeCodeMonitor::fetchUsageData(const QString &orgUuid, const QString &co
         reply->deleteLater();
 
         if (reply->error() != QNetworkReply::NoError) {
-            int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-            qWarning() << "ClaudeCodeMonitor: Usage fetch failed:" << reply->errorString() << "HTTP" << httpStatus;
-            setSyncing(false);
-            if (httpStatus == 401 || httpStatus == 403) {
-                setSyncStatus(i18n("Session expired"));
-                const QString message = i18n("Session expired — please log in to claude.ai in Firefox again");
-                Q_EMIT syncDiagnostic(toolName(), QStringLiteral("session_expired"), message);
-                Q_EMIT syncCompleted(false, message);
-            } else {
-                setSyncStatus(i18n("Sync failed"));
-                const QString message = reply->errorString();
-                Q_EMIT syncDiagnostic(toolName(), QStringLiteral("network_error"), message);
-                Q_EMIT syncCompleted(false, message);
-            }
+          recordSyncHttpFailure(
+              reply->attribute(QNetworkRequest::HttpStatusCodeAttribute)
+                  .toInt(),
+              reply->rawHeader("Retry-After"));
+          int httpStatus =
+              reply->attribute(QNetworkRequest::HttpStatusCodeAttribute)
+                  .toInt();
+          qWarning() << "ClaudeCodeMonitor: Usage fetch failed:"
+                     << reply->errorString() << "HTTP" << httpStatus;
+          setSyncing(false);
+          if (httpStatus == 401 || httpStatus == 403) {
+            setSyncStatus(i18n("Session expired"));
+            const QString message = i18n("Session expired — please log in to "
+                                         "claude.ai in Firefox again");
+            Q_EMIT syncDiagnostic(toolName(), QStringLiteral("session_expired"),
+                                  message);
+            Q_EMIT syncCompleted(false, message);
+          } else {
+            setSyncStatus(i18n("Sync failed"));
+            const QString message = reply->errorString();
+            Q_EMIT syncDiagnostic(toolName(), QStringLiteral("network_error"),
+                                  message);
+            Q_EMIT syncCompleted(false, message);
+          }
             return;
         }
 
@@ -282,40 +302,69 @@ void ClaudeCodeMonitor::fetchUsageData(const QString &orgUuid, const QString &co
             return;
         }
 
+        QVariantList windows;
+        for (const QString &key :
+             {QStringLiteral("five_hour"), QStringLiteral("seven_day")}) {
+          const auto window = root.value(key).toObject();
+          const auto utilization = window.value(QStringLiteral("utilization"));
+          if (!utilization.isDouble() || utilization.toDouble() < 0 ||
+              utilization.toDouble() > 100)
+            continue;
+          QVariantMap row{
+              {QStringLiteral("kind"), key},
+              {QStringLiteral("window"), key},
+              {QStringLiteral("source"), QStringLiteral("browser_sync")},
+              {QStringLiteral("precision"),
+               QStringLiteral("browser_sync_actual")},
+              {QStringLiteral("percentUsed"), utilization.toDouble()}};
+          const QDateTime reset = QDateTime::fromString(
+              window.value(QStringLiteral("resets_at")).toString(),
+              Qt::ISODate);
+          if (reset.isValid())
+            row.insert(QStringLiteral("resetAt"), reset);
+          windows.append(row);
+        }
+        setSyncedQuotaWindows(windows);
         // Parse 5-hour session usage
         QJsonObject fiveHour = root.value(QStringLiteral("five_hour")).toObject();
-        if (!fiveHour.isEmpty()) {
-            double utilization = fiveHour.value(QStringLiteral("utilization")).toDouble(0.0);
-            setSessionPercentUsed(utilization);
-            setHasSessionInfo(true);
+        if (fiveHour.value(QStringLiteral("utilization")).isDouble() &&
+            fiveHour.value(QStringLiteral("utilization")).toDouble() >= 0 &&
+            fiveHour.value(QStringLiteral("utilization")).toDouble() <= 100) {
+          double utilization =
+              fiveHour.value(QStringLiteral("utilization")).toDouble(0.0);
+          setHasSessionInfo(false);
 
-            // Convert percentage to count based on configured limit
-            int limit = usageLimit();
-            if (limit > 0) {
-                int used = static_cast<int>((utilization / 100.0) * limit);
-                setUsageCount(used);
-            }
+          // Convert percentage to count based on configured limit
+          int limit = usageLimit();
+          if (limit > 0) {
+            int used = static_cast<int>((utilization / 100.0) * limit);
+            setUsageCount(used);
+          }
 
-            // Update period reset time
-            QString resetsAt = fiveHour.value(QStringLiteral("resets_at")).toString();
-            if (!resetsAt.isEmpty()) {
-                QDateTime resetTime = QDateTime::fromString(resetsAt, Qt::ISODate);
-                if (resetTime.isValid()) {
-                    // Calculate period start from reset time (reset = start + 5h)
-                    setPeriodStart(resetTime.addSecs(-5 * 3600));
-                }
+          // Update period reset time
+          QString resetsAt =
+              fiveHour.value(QStringLiteral("resets_at")).toString();
+          if (!resetsAt.isEmpty()) {
+            QDateTime resetTime = QDateTime::fromString(resetsAt, Qt::ISODate);
+            if (resetTime.isValid()) {
+              // Calculate period start from reset time (reset = start + 5h)
+              setPeriodStart(resetTime.addSecs(-5 * 3600));
             }
+          }
         }
 
         // Parse 7-day (weekly) usage
         QJsonObject sevenDay = root.value(QStringLiteral("seven_day")).toObject();
-        if (!sevenDay.isEmpty()) {
-            double utilization = sevenDay.value(QStringLiteral("utilization")).toDouble(0.0);
-            int secLimit = secondaryUsageLimit();
-            if (secLimit > 0) {
-                int used = static_cast<int>((utilization / 100.0) * secLimit);
-                setSecondaryUsageCount(used);
-            }
+        if (sevenDay.value(QStringLiteral("utilization")).isDouble() &&
+            sevenDay.value(QStringLiteral("utilization")).toDouble() >= 0 &&
+            sevenDay.value(QStringLiteral("utilization")).toDouble() <= 100) {
+          double utilization =
+              sevenDay.value(QStringLiteral("utilization")).toDouble(0.0);
+          int secLimit = secondaryUsageLimit();
+          if (secLimit > 0) {
+            int used = static_cast<int>((utilization / 100.0) * secLimit);
+            setSecondaryUsageCount(used);
+          }
         }
 
         // Parse extra_usage (metered spending)

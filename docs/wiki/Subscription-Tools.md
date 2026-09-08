@@ -31,7 +31,7 @@ Model access and quotas are dynamic, so the catalog does not contain a fixed mod
 
 ## Local tracking
 
-Local monitors watch tool-specific state for activity. They do not read a public vendor quota API. Plan presets supply the window and limit, and the card counts activity against that local model.
+Local monitors watch tool-specific state for activity. They do not read a public vendor quota API. A custom activity target counts local requests. It is not a vendor entitlement, credit balance, or allowance. Without an explicit target, local activity has no quota percentage. Public presets describe prices and qualitative allowances separately.
 
 Choose the correct plan for locally tracked tools. Antigravity is the exception: its plan is detected automatically and has no custom-limit control.
 
@@ -61,3 +61,20 @@ Before enabling it:
 The feature depends on undocumented endpoints and can stop working after a service change. A failed sync does not invalidate local tracking.
 
 The widget does not export browser cookies or save them in its history database. Read [Privacy and security](Privacy-and-Security) for the exact boundary.
+
+## Public evidence and prices
+
+Each price and allowance carries its own source references, review date,
+effective date, and expiry date. Public evidence is valid through the expiry date
+(inclusive), at most 30 days after the oldest supporting source review. A recent
+catalog header cannot renew individual rows. Missing, malformed, future, expired,
+or manually disputed evidence is unavailable; Settings → Diagnostics lists the
+affected entries and official references. Catalog expiry does not invalidate a
+separately authenticated live account response.
+
+JetBrains personal and commercial prices remain ranges when the account type is
+unknown. A range is not reduced to its minimum fee, and unknown organization totals
+are unavailable. A per-seat price alone does not establish a team bill. Windsurf
+and Devin account transitions remain under review until a supported account
+contract is verified. Historical Copilot premium requests are archived and never
+serve as the denominator for current AI credits.

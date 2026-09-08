@@ -27,7 +27,15 @@ Item {
     readonly property int refreshConfigurationChanged: 4
     readonly property int refreshCredentialChanged: 5
 
-    RefreshSchedulerModel { id: refreshPolicy }
+    RefreshSchedulerModel {
+        id: refreshPolicy
+        Component.onCompleted: startMonitoring()
+        onRecoveryRequested: {
+            scheduler.refreshStaleProviders(scheduler.refreshScheduled);
+            scheduler.refreshAntigravity(false);
+            scheduler.performBrowserSync();
+        }
+    }
 
     onPopupOpenChanged: {
         if (popupOpen) {
@@ -121,11 +129,11 @@ Item {
             return;
         }
 
-        if (configuration.claudeCodeEnabled && claudeCodeMonitor.installed) {
+        if (configuration.claudeCodeEnabled && claudeCodeMonitor.installed && claudeCodeMonitor.canAutoSync()) {
             browserSyncService.sync("claude", claudeCodeMonitor);
         }
 
-        if (configuration.codexEnabled && codexCliMonitor.installed) {
+        if (configuration.codexEnabled && codexCliMonitor.installed && codexCliMonitor.canAutoSync()) {
             browserSyncService.sync("codex", codexCliMonitor);
         }
     }

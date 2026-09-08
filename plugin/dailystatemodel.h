@@ -2,7 +2,9 @@
 #define DAILYSTATEMODEL_H
 
 #include <QAbstractListModel>
+#include <QDateTime>
 #include <QPointer>
+#include <QTimer>
 #include <QVariantMap>
 #include <QtQmlIntegration/qqmlintegration.h>
 
@@ -13,6 +15,8 @@ class SubscriptionToolBackend;
 class DailyStateModel : public QAbstractListModel {
   Q_OBJECT
   QML_ELEMENT
+  Q_PROPERTY(QDateTime presentationTime READ presentationTime WRITE
+                 setPresentationTime NOTIFY presentationTimeChanged)
   Q_PROPERTY(int count READ rowCount NOTIFY countChanged)
   Q_PROPERTY(QVariantMap summary READ summary NOTIFY summaryChanged)
   Q_PROPERTY(int warningThreshold READ warningThreshold WRITE
@@ -69,6 +73,9 @@ public:
   QHash<int, QByteArray> roleNames() const override;
 
   QVariantMap summary() const;
+  QDateTime presentationTime() const;
+  void setPresentationTime(const QDateTime &time);
+  Q_INVOKABLE void resetPresentationTime();
   int warningThreshold() const;
   int criticalThreshold() const;
   void setWarningThreshold(int threshold);
@@ -85,6 +92,7 @@ public:
   Q_INVOKABLE void refresh();
 
 Q_SIGNALS:
+  void presentationTimeChanged();
   void countChanged();
   void summaryChanged();
   void sourceChanged(const QString &stableId);
@@ -107,6 +115,9 @@ private:
   QHash<QString, QString> m_historyDbNames;
   QList<QVariantMap> m_rows;
   QVariantMap m_summary;
+  QDateTime m_presentationTime = QDateTime::currentDateTimeUtc();
+  QTimer m_presentationTimer;
+  bool m_clockInjected = false;
   int m_warningThreshold = 80;
   int m_criticalThreshold = 95;
 };

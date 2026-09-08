@@ -1,12 +1,29 @@
 import QtQuick
 import QtQuick.Layouts
 import org.kde.plasma.plasmoid
+import org.kde.plasma.core as PlasmaCore
 import org.kde.plasma.components as PlasmaComponents
 import org.kde.kirigami as Kirigami
 import "components" as Components
 
 MouseArea {
     id: compactRoot
+
+    readonly property real textModeWidth: compactModeIcon.Layout.preferredWidth
+        + compactContent.columnSpacing + compactDailyValue.implicitWidth
+    readonly property bool verticalPanel: Plasmoid.formFactor === PlasmaCore.Types.Vertical
+    implicitWidth: displayMode === "icon"
+        ? Math.max(Kirigami.Units.iconSizes.small, height) : textModeWidth
+    implicitHeight: verticalPanel && displayMode !== "icon"
+        ? compactModeIcon.Layout.preferredHeight + compactContent.rowSpacing
+            + compactDailyValue.implicitHeight
+        : Kirigami.Units.iconSizes.small
+    Layout.fillWidth: verticalPanel
+    Layout.minimumWidth: verticalPanel ? Kirigami.Units.iconSizes.small : implicitWidth
+    Layout.preferredWidth: implicitWidth
+    Layout.maximumWidth: verticalPanel ? Number.POSITIVE_INFINITY : implicitWidth
+    Layout.minimumHeight: verticalPanel ? implicitHeight : Kirigami.Units.iconSizes.small
+    Layout.preferredHeight: implicitHeight
 
     required property var monitor
     readonly property url brandedIconSource: Qt.resolvedUrl("../icons/logo.png")
@@ -15,6 +32,7 @@ MouseArea {
 
     Components.CompactMetricState {
         id: compactState
+        presentationTime: compactRoot.monitor.dailyState.presentationTime
         summary: compactRoot.monitor.presentationDailyState
                  && compactRoot.monitor.presentationDailyState.summary
             ? compactRoot.monitor.presentationDailyState.summary : ({})
@@ -40,6 +58,9 @@ MouseArea {
     Accessible.name: i18n("AI Usage Monitor: %1", accessibleText())
     hoverEnabled: true
     onClicked: Plasmoid.activated()
+    activeFocusOnTab: true
+    Keys.onSpacePressed: Plasmoid.activated()
+    Keys.onReturnPressed: Plasmoid.activated()
 
     Kirigami.Icon {
         id: mainIcon
@@ -74,20 +95,29 @@ MouseArea {
         }
     }
 
-    RowLayout {
+    GridLayout {
+        id: compactContent
         anchors.fill: parent
         visible: compactRoot.displayMode !== "icon"
-        spacing: Kirigami.Units.smallSpacing / 2
+        columns: compactRoot.verticalPanel ? 1 : 2
+        columnSpacing: Kirigami.Units.smallSpacing / 2
+        rowSpacing: Kirigami.Units.smallSpacing / 2
 
         Kirigami.Icon {
+            id: compactModeIcon
             source: compactRoot.brandedIconSource
             Layout.preferredWidth: Kirigami.Units.iconSizes.small
             Layout.preferredHeight: width
+            Layout.alignment: Qt.AlignHCenter
         }
 
         PlasmaComponents.Label {
+            id: compactDailyValue
             objectName: "compactDailyValue"
             Layout.fillWidth: true
+            Layout.minimumWidth: 0
+            elide: Text.ElideRight
+            clip: true
             text: compactRoot.displayText()
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter

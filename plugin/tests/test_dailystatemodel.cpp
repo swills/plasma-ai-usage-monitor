@@ -113,11 +113,15 @@ class DailyStateModelTest : public QObject {
   Q_OBJECT
 
 private Q_SLOTS:
+  void liveClockAcceptsObservationAfterLastTick();
+  void actualQuotaWinsOverLocalTarget();
+  void providerQuotaAgesWithPresentationClock();
+  void quotaClockAndIndependentReset();
   void enabledSourcesAppearExactlyOnce();
   void toolOnlySummaryIsComplete();
   void unavailableAndAvailableZeroStayDistinct();
   void providerToolMixedCurrencyAndFeesAggregateSeparately();
-  void rangePricedToolUsesCatalogMinimumFee();
+  void rangePricedToolPreservesRange();
   void staleBalanceAndConnectivityRemainDistinct();
   void priorityRules_data();
   void priorityRules();
@@ -132,6 +136,124 @@ private Q_SLOTS:
   void sourceDetailPreservesTypedMetricsAndConcreteAction();
   void normalSourcesSortByReportingQuality();
 };
+
+void DailyStateModelTest::liveClockAcceptsObservationAfterLastTick() {
+  SourceReadinessModel readiness;
+  DailyStateModel daily;
+  DailyTool tool;
+  tool.setEnabled(true);
+  tool.install();
+  readiness.registerLocalTool("codex-cli", &tool);
+  daily.registerReadinessModel(&readiness);
+  daily.registerLocalTool("codex-cli", &tool);
+  daily.resetPresentationTime();
+  QTest::qWait(20);
+  tool.sync({QVariantMap{{"kind", "session"}, {"source", "browser_sync"},
+                        {"percentRemaining", 80.0}}});
+  QCOMPARE(daily.summary().value("lowestActualRemainingQuota").toMap().value("percentRemaining").toDouble(), 80.0);
+  QCOMPARE(readiness.source("codex-cli").value("readinessStateKey").toString(), QStringLiteral("reporting_actual"));
+}
+
+void DailyStateModelTest::actualQuotaWinsOverLocalTarget() {
+  SourceReadinessModel readiness;
+  DailyStateModel daily;
+  DailyTool tool;
+  tool.setEnabled(true);
+  tool.install();
+  tool.setUsageLimit(1);
+  tool.incrementUsage();
+  tool.sync({QVariantMap{{"kind", "session"},
+                         {"source", "browser_sync"},
+                         {"percentRemaining", 80.0}}});
+  readiness.registerLocalTool("codex-cli", &tool);
+  daily.registerReadinessModel(&readiness);
+  daily.registerLocalTool("codex-cli", &tool);
+  daily.setPresentationTime(QDateTime::currentDateTimeUtc().addSecs(1));
+  QCOMPARE(daily.source("codex-cli").value("percentRemaining").toDouble(),
+           80.0);
+  QCOMPARE(daily.summary()
+               .value("lowestActualRemainingQuota")
+               .toMap()
+               .value("percentRemaining")
+               .toDouble(),
+           80.0);
+}
+
+void DailyStateModelTest::providerQuotaAgesWithPresentationClock() {
+  SourceReadinessModel readiness;
+  DailyStateModel daily;
+  DailyProvider provider;
+  provider.makeReady();
+  const auto start = QDateTime::currentDateTimeUtc();
+  provider.addQuota(0, start.addSecs(3600));
+  readiness.registerProviderBackend("openai", &provider);
+  readiness.setSourceEnabled("openai", true);
+  daily.registerReadinessModel(&readiness);
+  daily.registerProviderBackend("openai", &provider);
+  daily.setPresentationTime(start.addSecs(1));
+  QCOMPARE(daily.summary()
+               .value("lowestActualRemainingQuota")
+               .toMap()
+               .value("percentRemaining")
+               .toDouble(),
+           0.0);
+  daily.setPresentationTime(start.addSecs(901));
+  QVERIFY(
+      daily.summary().value("lowestActualRemainingQuota").toMap().isEmpty());
+  QVERIFY(daily.summary().value("nearestActualReset").toMap().isEmpty());
+  QVERIFY(!daily.source("openai")
+               .value("lastKnownQuotaWindows")
+               .toList()
+               .isEmpty());
+}
+
+void DailyStateModelTest::quotaClockAndIndependentReset() {
+  SourceReadinessModel readiness;
+  DailyStateModel daily;
+  DailyTool tool;
+  tool.setEnabled(true);
+  tool.install();
+  const auto start = QDateTime::currentDateTimeUtc();
+  tool.sync({QVariantMap{{"kind", "weekly"},
+                         {"window", "weekly"},
+                         {"source", "antigravity_local"},
+                         {"percentRemaining", 10.0},
+                         {"resetAt", start.addDays(5)}},
+             QVariantMap{{"kind", "session"},
+                         {"window", "five-hour"},
+                         {"source", "antigravity_local"},
+                         {"percentRemaining", 80.0},
+                         {"resetAt", start.addSecs(3600)}}});
+  readiness.registerLocalTool(QStringLiteral("codex-cli"), &tool);
+  daily.registerReadinessModel(&readiness);
+  daily.registerLocalTool(QStringLiteral("codex-cli"), &tool);
+  daily.setPresentationTime(start.addSecs(1));
+  QCOMPARE(daily.summary()
+               .value("lowestActualRemainingQuota")
+               .toMap()
+               .value("percentRemaining")
+               .toDouble(),
+           10.0);
+  QCOMPARE(daily.summary()
+               .value("nearestActualReset")
+               .toMap()
+               .value("resetAt")
+               .toDateTime(),
+           start.addSecs(3600));
+  QVERIFY(tool.hasFreshQuota(start.addSecs(1)));
+  const auto observation = tool.lastQuotaObservation();
+  tool.recordActivity();
+  tool.sync({});
+  QCOMPARE(tool.lastQuotaObservation(), observation);
+  daily.setPresentationTime(start.addSecs(901));
+  QVERIFY(
+      daily.summary().value("lowestActualRemainingQuota").toMap().isEmpty());
+  QVERIFY(daily.summary().value("nearestActualReset").toMap().isEmpty());
+  QVERIFY(!daily.source("codex-cli")
+               .value("lastKnownQuotaWindows")
+               .toList()
+               .isEmpty());
+}
 
 void DailyStateModelTest::enabledSourcesAppearExactlyOnce() {
   SourceReadinessModel readiness;
@@ -288,7 +410,7 @@ void DailyStateModelTest::
            2.5);
 }
 
-void DailyStateModelTest::rangePricedToolUsesCatalogMinimumFee() {
+void DailyStateModelTest::rangePricedToolPreservesRange() {
   SourceReadinessModel readiness;
   DailyStateModel daily;
   DailyTool tool;
@@ -302,7 +424,15 @@ void DailyStateModelTest::rangePricedToolUsesCatalogMinimumFee() {
 
   const QVariantMap fixedFees =
       daily.summary().value(QStringLiteral("fixedSubscriptionFees")).toMap();
-  QCOMPARE(fixedFees.value(QStringLiteral("USD")).toDouble(), 10.0);
+  QVERIFY(fixedFees.isEmpty());
+  const auto ranges = daily.summary()
+                          .value(QStringLiteral("fixedSubscriptionFeeRanges"))
+                          .toList();
+  QCOMPARE(ranges.size(), 1);
+  QCOMPARE(ranges.first().toMap().value(QStringLiteral("rangeMin")).toDouble(),
+           10.0);
+  QVERIFY(ranges.first().toMap().value(QStringLiteral("rangeMax")).toDouble() >
+          10.0);
 }
 
 void DailyStateModelTest::staleBalanceAndConnectivityRemainDistinct() {

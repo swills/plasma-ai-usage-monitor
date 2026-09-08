@@ -1,0 +1,45 @@
+name: Panel matrix
+on:
+  workflow_dispatch:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  panel-matrix:
+    runs-on: ubuntu-latest
+    container: fedora:44
+    strategy:
+      fail-fast: false
+      matrix:
+        scale: ['1', '1.25', '1.5', '2']
+        theme: [light, dark]
+    steps:
+      - run: dnf install -y git cmake ninja-build gcc-c++ dbus-daemon extra-cmake-modules qt6-qtbase-devel qt6-qtdeclarative-devel libplasma-devel plasma-workspace kf6-kcoreaddons-devel kf6-kpackage-devel kf6-kwallet-devel kf6-ki18n-devel kf6-knotifications-devel openssl-devel protobuf-compiler protobuf-devel python3-PyQt6 xorg-x11-server-Xvfb
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with: { fetch-depth: 0 }
+      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - run: cmake --preset ci && cmake --build --preset ci
+      - name: Install isolated capture dependencies
+        run: |
+          dnf install -y kwin-wayland plasma-desktop spectacle ImageMagick jq ripgrep python3-gobject at-spi2-core breeze-gtk mesa-dri-drivers libcap procps-ng xorg-x11-server-Xwayland
+          # Virtual capture does not need the package's real-time scheduling capability.
+          # Removing it avoids execve(EPERM) under Docker's capability bounding set.
+          getcap /usr/bin/kwin_wayland
+          setcap -r /usr/bin/kwin_wayland
+      - name: Capture isolated panel states and geometry
+        timeout-minutes: 20
+        run: python3 scripts/demo/capture_panel_matrix.py --build-dir build/ci --output build/panel-matrix --scales '${{ matrix.scale }}' --themes '${{ matrix.theme }}'
+      - run: python3 scripts/check_panel_matrix.py build/panel-matrix --allow-subset
+      - name: Upload qualified panel matrix
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: panel-matrix-${{ github.sha }}-${{ matrix.scale }}-${{ matrix.theme }}
+          path: build/panel-matrix/
+          if-no-files-found: error
+      - name: Upload failed capture diagnostics
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: panel-matrix-failure-${{ github.sha }}-${{ matrix.scale }}-${{ matrix.theme }}
+          path: build/panel-matrix/
+          if-no-files-found: ignore

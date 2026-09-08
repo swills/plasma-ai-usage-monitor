@@ -293,16 +293,23 @@ SourceReadinessModel::Snapshot SourceReadinessModel::snapshotFor(const SourceEnt
                 result.state = SourceState::Failed;
                 result.nextAction = NextAction::CompleteConfiguration;
             }
-        } else if (tool && tool->lastSyncTime().isValid()) {
-            result.state = SourceState::ReportingActual;
-            result.nextAction = NextAction::None;
-        } else if (tool && (tool->lastActivity().isValid() || tool->usageCount() > 0
-                            || entry.localVerification.isValid())) {
-            result.state = SourceState::ReportingEstimate;
-            result.nextAction = NextAction::None;
+        } else if (tool &&
+                   tool->hasFreshQuota(m_presentationTime.isValid()
+                                           ? m_presentationTime
+                                           : QDateTime::currentDateTimeUtc())) {
+          result.state = SourceState::ReportingActual;
+          result.nextAction = NextAction::None;
+        } else if (tool && tool->lastQuotaObservation().isValid()) {
+          result.state = SourceState::Degraded;
+          result.nextAction = NextAction::RefreshStaleData;
+        } else if (tool &&
+                   (tool->lastActivity().isValid() || tool->usageCount() > 0 ||
+                    entry.localVerification.isValid())) {
+          result.state = SourceState::ReportingEstimate;
+          result.nextAction = NextAction::None;
         } else {
-            result.state = SourceState::ReadyToVerify;
-            result.nextAction = NextAction::VerifySource;
+          result.state = SourceState::ReadyToVerify;
+          result.nextAction = NextAction::VerifySource;
         }
         return result;
     }
@@ -384,12 +391,16 @@ SourceReadinessModel::Snapshot SourceReadinessModel::snapshotFor(const SourceEnt
         }
     }
 
-    if (backend->providerState() == ProviderBackend::ProviderState::Stale
-        || backend->freshness() == ProviderBackend::Freshness::Stale) {
-        result.state = SourceState::Degraded;
-        result.errorCode = QStringLiteral("stale");
-        result.nextAction = NextAction::RefreshStaleData;
-        return result;
+    if (backend->providerState() == ProviderBackend::ProviderState::Stale ||
+        (backend->lastSuccess().isValid() &&
+         backend->lastSuccess().secsTo(m_presentationTime.isValid()
+                                           ? m_presentationTime
+                                           : QDateTime::currentDateTimeUtc()) >=
+             900)) {
+      result.state = SourceState::Degraded;
+      result.errorCode = QStringLiteral("stale");
+      result.nextAction = NextAction::RefreshStaleData;
+      return result;
     }
     if (backend->providerState() == ProviderBackend::ProviderState::Degraded) {
         result.state = SourceState::Degraded;
@@ -592,4 +603,10 @@ QString SourceReadinessModel::nextActionText(NextAction action)
     case NextAction::RetryLater: return i18n("Retry the verification later");
     }
     return {};
+}
+
+void SourceReadinessModel::setPresentationTime(const QDateTime &time) {
+  m_presentationTime = time;
+  for (int row = 0; row < m_sources.size(); ++row)
+    updateRow(row);
 }

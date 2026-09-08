@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import argparse
 import json
+import math
+from urllib.parse import urlparse
 import sys
 from datetime import date
 from pathlib import Path
@@ -19,7 +21,7 @@ def fail(message: str) -> None:
 def iso_date(value: str, label: str) -> date:
     try:
         return date.fromisoformat(value)
-    except ValueError:
+    except (ValueError, TypeError):
         fail(f"{label} must be ISO date YYYY-MM-DD")
 
 
@@ -31,7 +33,40 @@ def require_source_refs(refs, context: str) -> None:
             fail(f"{context} sourceRef must be an object")
         if not ref.get("label") or not ref.get("url"):
             fail(f"{context} sourceRef missing label/url")
+        if urlparse(str(ref.get("url", ""))).scheme != "https" or not urlparse(str(ref.get("url", ""))).hostname:
+            fail(f"{context} sourceRef requires HTTPS URL")
         iso_date(str(ref.get("reviewedAt", "")), f"{context} sourceRef reviewedAt")
+
+
+def check_evidence(evidence, context: str, today=None) -> None:
+    if not isinstance(evidence, dict):
+        fail(f"{context} missing evidence")
+    reviewed = iso_date(evidence.get("reviewedAt", ""), f"{context} reviewedAt")
+    effective = iso_date(evidence.get("effectiveFrom", ""), f"{context} effectiveFrom")
+    expires = iso_date(evidence.get("expiresAt", ""), f"{context} expiresAt")
+    require_source_refs(evidence.get("sourceRefs"), context)
+    if expires < reviewed or expires < effective or (expires - reviewed).days > 30:
+        fail(f"{context} invalid evidence interval; expiry must be within 30 days of review")
+    for ref in evidence['sourceRefs']:
+        source_review = iso_date(ref['reviewedAt'], context)
+        if source_review > reviewed or (expires - source_review).days > 30:
+            fail(f"{context} source review does not cover evidence interval")
+    if evidence.get("archived") and not evidence.get("needsManualReview"):
+        fail(f"{context} archived evidence must remain unavailable")
+    if today is not None and not evidence.get('archived'):
+        if today < reviewed or today < effective or today > expires:
+            fail(f"{context} evidence not current ({reviewed}..{expires}); review {evidence['sourceRefs'][0]['url']}")
+
+
+def check_numbers(entry, context):
+    for field in ('amount', 'rangeMin', 'rangeMax', 'limit', 'creditUsdValue'):
+        if field in entry and (type(entry[field]) not in (int, float) or not math.isfinite(entry[field]) or entry[field] < 0):
+            fail(f"{context} {field} must be a finite non-negative number")
+    if 'rangeMin' in entry or 'rangeMax' in entry:
+        if 'rangeMin' not in entry or 'rangeMax' not in entry or entry['rangeMin'] > entry['rangeMax'] or 'amount' in entry:
+            fail(f"{context} malformed range")
+        if entry.get('precision') == 'official_exact':
+            fail(f"{context} range must not claim exact precision")
 
 
 def check_price(price, context: str) -> None:
@@ -39,6 +74,7 @@ def check_price(price, context: str) -> None:
         return
     if not isinstance(price, dict):
         fail(f"{context} price must be an object")
+    check_numbers(price, context)
     if "precision" not in price:
         fail(f"{context} price missing precision")
     if "amount" in price:
@@ -63,6 +99,7 @@ def check_quota_windows(windows, context: str) -> None:
         for field in ("kind", "label", "precision", "source", "visibleByDefault"):
             if field not in window:
                 fail(f"{context} quota window missing {field}")
+        check_numbers(window, context)
         has_exact_limit = "limit" in window and isinstance(window["limit"], (int, float))
         has_range = "rangeMin" in window or "rangeMax" in window
         if has_exact_limit and window["precision"] not in EXACT_PRECISIONS:
@@ -76,6 +113,8 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--allow-manual-review", action="store_true",
                         help="Allow manual review/source conflict items. Strict release checks allow them only because the UI surfaces them.")
+    parser.add_argument("--structural-only", action="store_true", help="Validate schema and intervals without wall-clock freshness; not a release gate")
+    parser.add_argument("--as-of", type=date.fromisoformat, default=date.today(), help="Evidence date; release checks use today")
     args = parser.parse_args()
 
     if not CATALOG.exists():
@@ -92,7 +131,7 @@ def main() -> None:
         fail("runtimeScraping must be false")
 
     reviewed_date = iso_date(str(catalog.get("lastReviewed", "")), "lastReviewed")
-    if (date.today() - reviewed_date).days > 30:
+    if not args.structural_only and not 0 <= (args.as_of - reviewed_date).days <= 30:
         fail(f"catalog lastReviewed is stale: {reviewed_date}")
 
     tools = catalog.get("tools")
@@ -145,6 +184,10 @@ def main() -> None:
             plan_ids.add(plan_id)
             check_price(plan.get("price"), f"{key}/{plan_id}")
             check_quota_windows(plan.get("quotaWindows", []), f"{key}/{plan_id}")
+            for entry in ([plan["price"]] if "price" in plan else []) + plan.get("quotaWindows", []):
+                check_evidence(entry.get("evidence"), f"{key}/{plan_id}", None if args.structural_only else args.as_of)
+            check_price(plan.get("price"), f"{key}/{plan_id}")
+            check_quota_windows(plan.get("quotaWindows", []), f"{key}/{plan_id}")
 
         for mode in modes:
             if not isinstance(mode, dict):
@@ -154,6 +197,9 @@ def main() -> None:
             for date_field in ("validFrom", "validUntil"):
                 if date_field in mode:
                     iso_date(str(mode[date_field]), f"{key}/{mode['id']} {date_field}")
+            check_quota_windows(mode.get("quotaWindows", []), f"{key}/{mode['id']}")
+            for entry in mode.get("quotaWindows", []):
+                check_evidence(entry.get("evidence"), f"{key}/{mode['id']}", None if args.structural_only else args.as_of)
             check_quota_windows(mode.get("quotaWindows", []), f"{key}/{mode['id']}")
 
     missing = EXPECTED_TOOLS - seen
