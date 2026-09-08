@@ -5,10 +5,7 @@ on:
 permissions:
   contents: write
 jobs:
-  candidate:
-    uses: ./.github/workflows/candidate.yml
   exact-tag-artifacts:
-    needs: candidate
     environment: release
     runs-on: ubuntu-latest
     container: fedora:44
