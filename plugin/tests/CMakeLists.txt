@@ -644,6 +644,19 @@ target_link_libraries(test_updatechecker
 
 add_test(NAME updatechecker COMMAND test_updatechecker)
 
+# --- BrowserSyncService no-cookie dispatch regression ---
+add_executable(test_browsersyncservice
+    test_browsersyncservice.cpp
+    ${CMAKE_SOURCE_DIR}/plugin/browsersyncservice.cpp
+    ${CMAKE_SOURCE_DIR}/plugin/browsercookieextractor.cpp
+)
+target_include_directories(test_browsersyncservice PRIVATE ${CMAKE_SOURCE_DIR}/plugin)
+target_link_libraries(test_browsersyncservice
+    PRIVATE Qt6::Core Qt6::Test Qt6::Sql KF6::Wallet OpenSSL::Crypto
+)
+add_test(NAME browsersyncservice COMMAND test_browsersyncservice)
+set_tests_properties(browsersyncservice PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
 # --- UsageDatabase extended test ---
 add_executable(test_usagedatabase_extended
     test_usagedatabase_extended.cpp
