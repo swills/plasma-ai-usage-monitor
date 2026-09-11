@@ -42,6 +42,7 @@ LocalMetricsServer::LocalMetricsServer(QObject *parent)
                     socket->disconnectFromHost();
                     return;
                 }
+                Q_EMIT payloadRequested();
                 const QByteArray body = m_payload.toUtf8();
                 QByteArray response =
                     "HTTP/1.1 200 OK\r\n"

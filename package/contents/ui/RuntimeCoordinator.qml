@@ -233,18 +233,20 @@ Item {
     }
 
     function recordToolUsageSnapshot(monitor) {
-        if (!usageDatabase.enabled || !monitor) {
+        if (!monitor) {
             return;
         }
 
-        usageDatabase.recordToolSnapshot(
-            monitor.toolName,
-            monitor.usageCount,
-            monitor.usageLimit,
-            monitor.periodLabel,
-            monitor.planTier,
-            monitor.limitReached
-        );
+        if (usageDatabase.enabled) {
+            usageDatabase.recordToolSnapshot(
+                monitor.toolName,
+                monitor.usageCount,
+                monitor.usageLimit,
+                monitor.periodLabel,
+                monitor.planTier,
+                monitor.limitReached
+            );
+        }
         syncMetricsPayload();
     }
 
@@ -457,6 +459,7 @@ Item {
         for (var i = 0; i < tools.length; i++) {
             var monitor = tools[i].monitor;
             monitor.usageUpdated.connect(makeToolSnapshotHandler(monitor));
+            monitor.quotaWindowsChanged.connect(syncMetricsPayload);
         }
     }
 
@@ -499,6 +502,14 @@ Item {
 
         function onForecastsChanged() {
             MonitorPlugin.AppInfo.performanceMark("guardrail_query_end");
+            runtime.syncMetricsPayload();
+        }
+    }
+
+    Connections {
+        target: runtime.metricsServer
+
+        function onPayloadRequested() {
             runtime.syncMetricsPayload();
         }
     }

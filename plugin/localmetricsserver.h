@@ -41,6 +41,7 @@ Q_SIGNALS:
     void enabledChanged();
     void portChanged();
     void listenOnAllInterfacesChanged();
+    void payloadRequested();
     void payloadChanged();
     void listeningChanged();
     void error(const QString &message);
