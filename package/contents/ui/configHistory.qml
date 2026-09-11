@@ -180,6 +180,7 @@ KCM.SimpleKCM {
             visible: prometheusSwitch.checked && prometheusNetworkSwitch.checked
             type: Kirigami.MessageType.Warning
             text: i18n("The metrics endpoint has no authentication or encryption. Anyone who can reach this port can read the exported metrics. Restrict access with a firewall.")
+            Accessible.name: text
             Layout.fillWidth: true
         }
 
