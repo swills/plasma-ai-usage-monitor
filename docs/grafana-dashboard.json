@@ -183,12 +183,12 @@
           "editorMode": "code",
           "expr": "min(ai_usage_provider_connected)",
           "instant": true,
-          "legendFormat": "Providers",
+          "legendFormat": "All providers",
           "range": false,
           "refId": "A"
         }
       ],
-      "title": "Provider Connectivity",
+      "title": "All Providers Connected",
       "type": "stat"
     },
     {

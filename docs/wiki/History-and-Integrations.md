@@ -114,7 +114,7 @@ must not be treated as live quota.
 `ai_usage_guardrail_risk_state` uses `0` unavailable, `1` safe, `2` warning,
 `3` critical and `4` exceeded.
 `ai_usage_guardrail_seconds_until_event` appears only when a predicted event
-exists. Their labels are limited to provider, risk kind, and actual/estimated
+exists. Their labels are limited to source, risk kind, and actual/estimated
 value class.
 
 Import `docs/grafana-dashboard.json` into Grafana for a starter dashboard. Pick
