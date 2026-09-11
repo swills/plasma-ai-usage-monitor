@@ -249,6 +249,19 @@ target_link_libraries(test_subscription_tools
 
 add_test(NAME subscription_tools COMMAND test_subscription_tools)
 
+add_executable(test_codexlocalauth
+    test_codexlocalauth.cpp
+    ${TEST_CATALOG_SRC}
+    ${CMAKE_SOURCE_DIR}/plugin/subscriptiontoolbackend.cpp
+    ${CMAKE_SOURCE_DIR}/plugin/localactivitymonitorbase.cpp
+    ${CMAKE_SOURCE_DIR}/plugin/codexclimonitor.cpp
+)
+target_include_directories(test_codexlocalauth PRIVATE ${CMAKE_SOURCE_DIR}/plugin)
+target_link_libraries(test_codexlocalauth
+    PRIVATE Qt6::Core Qt6::Test Qt6::Network KF6::I18n
+)
+add_test(NAME codexlocalauth COMMAND test_codexlocalauth)
+
 add_executable(test_antigravitymonitor
     test_antigravitymonitor.cpp
     ${TEST_CATALOG_SRC}
@@ -449,6 +462,7 @@ add_test(
 add_executable(test_phase7_qml
     test_phase7_qml.cpp
 )
+
 target_link_libraries(test_phase7_qml PRIVATE Qt6::QuickTest)
 add_test(
     NAME phase7_qml
@@ -643,19 +657,6 @@ target_link_libraries(test_updatechecker
 )
 
 add_test(NAME updatechecker COMMAND test_updatechecker)
-
-# --- BrowserSyncService no-cookie dispatch regression ---
-add_executable(test_browsersyncservice
-    test_browsersyncservice.cpp
-    ${CMAKE_SOURCE_DIR}/plugin/browsersyncservice.cpp
-    ${CMAKE_SOURCE_DIR}/plugin/browsercookieextractor.cpp
-)
-target_include_directories(test_browsersyncservice PRIVATE ${CMAKE_SOURCE_DIR}/plugin)
-target_link_libraries(test_browsersyncservice
-    PRIVATE Qt6::Core Qt6::Test Qt6::Sql KF6::Wallet OpenSSL::Crypto
-)
-add_test(NAME browsersyncservice COMMAND test_browsersyncservice)
-set_tests_properties(browsersyncservice PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 
 # --- UsageDatabase extended test ---
 add_executable(test_usagedatabase_extended

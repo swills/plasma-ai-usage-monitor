@@ -62,7 +62,7 @@ bool BrowserSyncService::sync(const QString &service, QObject *monitor)
         return false;
     }
     const QString cookieHeader = m_extractor.getCookieHeader(domain);
-    if (cookieHeader.isEmpty() && service == QLatin1String("claude")) {
+    if (cookieHeader.isEmpty()) {
         recordFailure(QStringLiteral("session_missing_or_expired"));
         return false;
     }
