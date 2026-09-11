@@ -134,9 +134,8 @@ required_dashboard_queries = {
     'min(ai_usage_tool_quota_percent_remaining{tool=~"$tool"})',
     'clamp_min(min(ai_usage_tool_quota_reset_timestamp_seconds{tool=~"$tool"}) - time(), 0)',
     'ai_usage_tool_quota_percent_remaining{tool=~"$tool"}',
-    'sum(ai_usage_api_spend{period="month",currency="USD"})',
-    "min(ai_usage_provider_connected)",
-    "ai_usage_guardrail_risk_state",
+    '(min by (tool, kind) (ai_usage_tool_quota_percent_remaining{tool=~"$tool"}) / (clamp_min(-deriv((min by (tool, kind) (ai_usage_tool_quota_percent_remaining{tool=~"$tool"}))[1h:]) * 3600, 0) > 0)) * 3600',
+    'clamp_min(-deriv((min by (tool, kind) (ai_usage_tool_quota_percent_remaining{tool=~"$tool"}))[15m:]) * 3600, 0)',
 }
 missing_dashboard_queries = required_dashboard_queries - dashboard_expressions
 if missing_dashboard_queries:
@@ -144,11 +143,11 @@ if missing_dashboard_queries:
         "Grafana dashboard is missing contracted queries: "
         + ", ".join(sorted(missing_dashboard_queries))
     )
-connectivity_panels = [
+usage_rate_panels = [
     panel for panel in dashboard.get("panels", [])
-    if panel.get("title") == "All Providers Connected"
+    if panel.get("title") == "Quota Usage Rate"
 ]
-if len(connectivity_panels) != 1:
-    fail("Grafana connectivity panel must truthfully describe the all-provider minimum")
+if len(usage_rate_panels) != 1 or usage_rate_panels[0].get("type") != "timeseries":
+    fail("Grafana quota usage rate must be presented as one time-series panel")
 
 print(f"Non-invasive monitoring OK: {len(catalog['providers'])} provider profiles")

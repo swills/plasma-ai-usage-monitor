@@ -2,7 +2,7 @@
   "annotations": {
     "list": []
   },
-  "description": "Live subscription quotas, provider connectivity, API spend, and guardrail risk from Plasma AI Usage Monitor.",
+  "description": "Live tool quota remaining, reset timing, estimated exhaustion, and smoothed quota usage rate from Plasma AI Usage Monitor.",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -33,7 +33,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 },
+      "gridPos": { "h": 5, "w": 8, "x": 0, "y": 0 },
       "id": 1,
       "options": {
         "colorMode": "background",
@@ -79,7 +79,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 0 },
+      "gridPos": { "h": 5, "w": 8, "x": 8, "y": 0 },
       "id": 2,
       "options": {
         "colorMode": "background",
@@ -108,72 +108,31 @@
         "type": "prometheus",
         "uid": "$datasource"
       },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "palette-classic" },
-          "decimals": 2,
-          "unit": "currencyUSD"
-        },
-        "overrides": []
-      },
-      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 0 },
-      "id": 3,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "sum(ai_usage_api_spend{period=\"month\",currency=\"USD\"})",
-          "instant": true,
-          "legendFormat": "Monthly API spend",
-          "range": false,
-          "refId": "A"
-        }
-      ],
-      "title": "API Spend This Month",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "$datasource"
-      },
+      "description": "Estimated time until each tool/window reaches zero at its current positive one-hour regression burn rate. Series with a zero burn rate intentionally return no value. Reset jumps can affect the regression, so projections are directional estimates, not forecasts.",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
-          "mappings": [
-            {
-              "options": {
-                "0": { "color": "red", "text": "Disconnected" },
-                "1": { "color": "green", "text": "Connected" }
-              },
-              "type": "value"
-            }
-          ],
+          "decimals": 0,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               { "color": "red", "value": null },
-              { "color": "green", "value": 1 }
+              { "color": "orange", "value": 3600 },
+              { "color": "green", "value": 21600 }
             ]
-          }
+          },
+          "unit": "s"
         },
         "overrides": []
       },
-      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 0 },
+      "gridPos": { "h": 5, "w": 8, "x": 16, "y": 0 },
       "id": 4,
       "options": {
-        "colorMode": "background",
+        "colorMode": "value",
         "graphMode": "none",
         "justifyMode": "auto",
-        "orientation": "auto",
+        "orientation": "horizontal",
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "textMode": "auto",
         "wideLayout": true
@@ -181,14 +140,14 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "min(ai_usage_provider_connected)",
+          "expr": "(min by (tool, kind) (ai_usage_tool_quota_percent_remaining{tool=~\"$tool\"}) / (clamp_min(-deriv((min by (tool, kind) (ai_usage_tool_quota_percent_remaining{tool=~\"$tool\"}))[1h:]) * 3600, 0) > 0)) * 3600",
           "instant": true,
-          "legendFormat": "All providers",
+          "legendFormat": "{{tool}} / {{kind}}",
           "range": false,
           "refId": "A"
         }
       ],
-      "title": "All Providers Connected",
+      "title": "Projected Time to Exhaustion",
       "type": "stat"
     },
     {
@@ -225,7 +184,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 9, "w": 16, "x": 0, "y": 5 },
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 5 },
       "id": 5,
       "options": {
         "legend": { "calcs": ["lastNotNull", "min"], "displayMode": "table", "placement": "bottom", "showLegend": true },
@@ -249,56 +208,53 @@
         "type": "prometheus",
         "uid": "$datasource"
       },
+      "description": "Shows the 15-minute smoothed slope of quota remaining for each tool/window, converted to %/hour. Declining quota appears as positive usage; reset jumps would produce negative usage and are clamped out at zero.",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
-          "mappings": [
-            {
-              "options": {
-                "0": { "color": "gray", "text": "Unavailable" },
-                "1": { "color": "green", "text": "Safe" },
-                "2": { "color": "yellow", "text": "Warning" },
-                "3": { "color": "orange", "text": "Critical" },
-                "4": { "color": "red", "text": "Exceeded" }
-              },
-              "type": "value"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "gray", "value": null },
-              { "color": "green", "value": 1 },
-              { "color": "yellow", "value": 2 },
-              { "color": "orange", "value": 3 },
-              { "color": "red", "value": 4 }
-            ]
-          }
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "decimals": 2,
+          "min": 0,
+          "unit": "suffix:%/hour"
         },
         "overrides": []
       },
-      "gridPos": { "h": 9, "w": 8, "x": 16, "y": 5 },
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 5 },
       "id": 6,
       "options": {
-        "alignValue": "left",
-        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
-        "mergeValues": true,
-        "rowHeight": 0.9,
-        "showValue": "auto",
-        "tooltip": { "mode": "single", "sort": "none" }
+        "legend": { "calcs": ["lastNotNull", "mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "targets": [
         {
           "editorMode": "code",
-          "expr": "ai_usage_guardrail_risk_state",
+          "expr": "clamp_min(-deriv((min by (tool, kind) (ai_usage_tool_quota_percent_remaining{tool=~\"$tool\"}))[15m:]) * 3600, 0)",
           "instant": false,
-          "legendFormat": "{{source}} / {{kind}}",
+          "legendFormat": "{{tool}} / {{kind}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Guardrail Risk",
-      "type": "state-timeline"
+      "title": "Quota Usage Rate",
+      "type": "timeseries"
     }
   ],
   "refresh": "30s",
@@ -347,6 +303,6 @@
   "timezone": "browser",
   "title": "Plasma AI Usage Monitor",
   "uid": "plasma-ai-usage-monitor",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
