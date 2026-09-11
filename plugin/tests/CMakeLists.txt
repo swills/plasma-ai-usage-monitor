@@ -463,6 +463,16 @@ add_executable(test_phase7_qml
     test_phase7_qml.cpp
 )
 
+add_executable(test_codexscheduling_qml
+    test_codexscheduling_qml.cpp
+)
+target_link_libraries(test_codexscheduling_qml PRIVATE Qt6::QuickTest)
+add_test(
+    NAME codexscheduling_qml
+    COMMAND test_codexscheduling_qml
+            -input "${CMAKE_CURRENT_SOURCE_DIR}/qml/codexscheduling"
+            -platform offscreen
+)
 target_link_libraries(test_phase7_qml PRIVATE Qt6::QuickTest)
 add_test(
     NAME phase7_qml
@@ -484,6 +494,7 @@ set(QML_TEST_NAMES
     history_qml
     phase6_qml
     phase7_qml
+    codexscheduling_qml
 )
 set_tests_properties(${QML_TEST_NAMES} PROPERTIES
     ENVIRONMENT
@@ -504,6 +515,7 @@ set(QML_TEST_TARGETS
     test_history_qml
     test_phase6_qml
     test_phase7_qml
+    test_codexscheduling_qml
 )
 foreach(qml_test_target IN LISTS QML_TEST_TARGETS)
     add_dependencies(${qml_test_target} aiusagemonitorplugin)
